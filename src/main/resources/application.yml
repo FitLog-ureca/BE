@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/fitlog
+    username: root
+    password: urecaureca
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.ureca.fitlog.domain
+
+logging:
+  level:
+    org.mybatis: DEBUG
+    com.ureca.fitlog: DEBUG
+

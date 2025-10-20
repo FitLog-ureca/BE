@@ -11,4 +11,21 @@
         )
         VALUES (1, #{exerciseId}, #{date}, #{setsTarget}, #{repsTarget}, #{caloriesTarget}, false);
     </insert>
+
+    <!-- ✅ 새로 추가: 날짜별 투두 조회 -->
+    <select id="findTodosByDate" parameterType="java.time.LocalDate"
+            resultType="com.ureca.fitlog.dto.TodoResponseDTO$TodoItem">
+        SELECT
+            t.todo_id AS todoId,
+            e.name AS exerciseName,
+            t.sets_target AS setsTarget,
+            t.reps_target AS repsTarget,
+            t.calories_target AS caloriesTarget,
+            t.is_completed AS isCompleted
+        FROM todos t
+                 JOIN exercises e ON t.exercise_id = e.exercise_id
+        WHERE t.date = #{date}
+        ORDER BY t.todo_id ASC;
+    </select>
+
 </mapper>

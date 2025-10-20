@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,5 +28,19 @@ public class TodoController {
     public ResponseEntity<TodoResponseDTO> getTodosByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(todoService.getTodosByDate(date));
+    }
+
+    /** 체크 (완료 여부 갱신) */
+    @PatchMapping("/{id}/complete")
+    public ResponseEntity<Map<String, Object>> updateTodoCompletion(
+            @PathVariable("id") Long todoId,
+            @RequestParam(defaultValue = "true") Boolean isCompleted) {
+        return ResponseEntity.ok(todoService.updateTodoCompletion(todoId, isCompleted));
+    }
+
+    /** 삭제 */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> deleteTodoById(@PathVariable("id") Long todoId) {
+        return ResponseEntity.ok(todoService.deleteTodoById(todoId));
     }
 }

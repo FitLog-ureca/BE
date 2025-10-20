@@ -38,5 +38,29 @@ public class TodoService {
         response.setMessage("ToDoList가 성공적으로 조회되었습니다.");
         return response;
     }
-
+    /** 투두 완료 체크 */
+    public Map<String, Object> updateTodoCompletion(Long todoId, Boolean isCompleted) {
+        int updated = todoMapper.updateTodoCompletion(todoId, isCompleted);
+        Map<String, Object> response = new HashMap<>();
+        if (updated > 0) {
+            response.put("todoId", todoId);
+            response.put("isCompleted", isCompleted);
+            response.put("message", "TodoList가 성공적으로 갱신되었습니다.");
+        } else {
+            response.put("message", "해당 Todo가 존재하지 않습니다.");
+        }
+        return response;
+    }
+    /** 투두 삭제 */
+    public Map<String, Object> deleteTodoById(Long todoId) {
+        int deleted = todoMapper.deleteTodoById(todoId);
+        Map<String, Object> response = new HashMap<>();
+        if (deleted > 0) {
+            response.put("todoId", todoId);
+            response.put("message", "TodoList가 성공적으로 삭제되었습니다.");
+        } else {
+            response.put("message", "해당 Todo가 존재하지 않습니다.");
+        }
+        return response;
+    }
 }

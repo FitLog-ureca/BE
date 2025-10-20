@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ureca.fitlog.mapper.TodoMapper">
+    <!--    todo 생성 -->
+    <insert id="insertTodo" parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
+        INSERT INTO todos (
+            user_id, exercise_id, date, sets_target, reps_target, calories_target, is_completed
+        )
+        VALUES (1, #{exerciseId}, #{date}, #{setsTarget}, #{repsTarget}, #{caloriesTarget}, false);
+    </insert>
+</mapper>

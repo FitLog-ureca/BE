@@ -49,6 +49,8 @@
     <update id="updateTodo" parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
         UPDATE todos
         SET
+            date = #{date},
+            exercise_id = #{exerciseId},
             sets_number = #{setsNumber},
             reps_target = #{repsTarget},
             rest_time = #{restTime},

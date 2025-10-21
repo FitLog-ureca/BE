@@ -7,9 +7,19 @@
     <!-- todo 생성 -->
     <insert id="insertTodo" parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
         INSERT INTO todos (
-            user_id, exercise_id, date, sets_target, reps_target, calories_target, is_completed
+        user_id, exercise_id, date, sets_number, reps_target, rest_time, is_completed
         )
-        VALUES (1, #{exerciseId}, #{date}, #{setsTarget}, #{repsTarget}, #{caloriesTarget}, false);
+        VALUES (
+        --
+        1,
+
+        #{exerciseId},
+        #{date},
+        #{setsNumber},
+        #{repsTarget},
+        #{restTime},
+        #{isCompleted}
+        );
     </insert>
 
     <!-- 날짜별 투두 조회 -->
@@ -18,9 +28,9 @@
         SELECT
             t.todo_id AS todoId,
             e.name AS exerciseName,
-            t.sets_target AS setsTarget,
+            t.sets_number AS setsNumber,
             t.reps_target AS repsTarget,
-            t.calories_target AS caloriesTarget,
+            t.rest_time AS restTime,
             t.is_completed AS isCompleted
         FROM todos t
                  JOIN exercises e ON t.exercise_id = e.exercise_id

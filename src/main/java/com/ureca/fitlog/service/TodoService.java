@@ -23,6 +23,9 @@ public class TodoService {
 
         Map<String, Object> response = new HashMap<>();
         response.put("date", dto.getDate());
+        response.put("setsNumber", dto.getSetsNumber());
+        response.put("repsTarget", dto.getRepsTarget());
+        response.put("restTime", dto.getRestTime());
         response.put("isCompleted", false);
         response.put("message", "TodoList가 성공적으로 생성되었습니다.");
         return response;
@@ -33,9 +36,10 @@ public class TodoService {
         List<TodoResponseDTO.TodoItem> todos = todoMapper.findTodosByDate(date);
         TodoResponseDTO response = new TodoResponseDTO();
         response.setDate(date);
-        response.setCalendarStatus(todos.isEmpty() ? "NOT_STARTED" : "IN_PROGRESS");
         response.setTodos(todos);
-        response.setMessage("ToDoList가 성공적으로 조회되었습니다.");
+        response.setMessage(todos.isEmpty()
+                ? "등록된 Todo가 없습니다."
+                : "TodoList가 성공적으로 조회되었습니다.");
         return response;
     }
     /** 투두 완료 체크 */

@@ -37,6 +37,16 @@ public class TodoController {
             @RequestParam(defaultValue = "true") Boolean isCompleted) {
         return ResponseEntity.ok(todoService.updateTodoCompletion(todoId, isCompleted));
     }
+    /** 수정 */
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> updateTodo(
+            @PathVariable("id") Long todoId,
+            @RequestBody TodoRequestDTO dto) {
+
+        dto.setTodoId(todoId);
+        Map<String, Object> response = todoService.updateTodo(dto);
+        return ResponseEntity.ok(response);
+    }
 
     /** 삭제 */
     @DeleteMapping("/{id}")

@@ -7,6 +7,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class TodoRequestDTO {
+    private Long todoId;
     private LocalDate date;       // 운동 날짜
     private Long exerciseId;      // 운동 종목 ID
     private Integer setsNumber;   // 세트 수

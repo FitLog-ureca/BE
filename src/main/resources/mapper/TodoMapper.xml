@@ -45,6 +45,17 @@
         WHERE todo_id = #{todoId};
     </update>
 
+    <!-- 투두 수정 -->
+    <update id="updateTodo" parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
+        UPDATE todos
+        SET
+            sets_number = #{setsNumber},
+            reps_target = #{repsTarget},
+            rest_time = #{restTime},
+            is_completed = #{isCompleted},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE todo_id = #{todoId};
+    </update>
     <!-- 삭제 -->
     <delete id="deleteTodoById">
         DELETE FROM todos

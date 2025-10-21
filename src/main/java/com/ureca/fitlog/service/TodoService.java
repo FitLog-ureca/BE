@@ -55,6 +55,20 @@ public class TodoService {
         }
         return response;
     }
+    /** 투두 수정 */
+    public Map<String, Object> updateTodo(TodoRequestDTO dto) {
+        int updated = todoMapper.updateTodo(dto);
+
+        Map<String, Object> response = new HashMap<>();
+        if (updated > 0) {
+            response.put("todoId", dto.getTodoId());
+            response.put("message", "Todo가 성공적으로 수정되었습니다.");
+        } else {
+            response.put("message", "해당 Todo가 존재하지 않습니다.");
+        }
+        return response;
+    }
+
     /** 투두 삭제 */
     public Map<String, Object> deleteTodoById(Long todoId) {
         int deleted = todoMapper.deleteTodoById(todoId);

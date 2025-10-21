@@ -13,6 +13,7 @@ public interface TodoMapper {
     void insertTodo(TodoRequestDTO dto);
     List<TodoResponseDTO.TodoItem> findTodosByDate(@Param("date") LocalDate date);
     int updateTodoCompletion(@Param("todoId") Long todoId, @Param("isCompleted") Boolean isCompleted);
+    int updateTodo(TodoRequestDTO dto);
     int deleteTodoById(@Param("todoId") Long todoId);
 }
 

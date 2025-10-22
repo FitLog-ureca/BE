@@ -1,13 +1,9 @@
 package com.ureca.fitlog.auth.service;
 
-import com.ureca.fitlog.auth.dto.SignupRequestDTO;
-import com.ureca.fitlog.auth.dto.SignupResponseDTO;
+import com.ureca.fitlog.auth.dto.*;
 import com.ureca.fitlog.auth.mapper.AuthMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-
-
 import java.time.LocalDateTime;
 
 @Service
@@ -26,7 +22,7 @@ public class AuthService {
         authMapper.insertUser(
                 request.getName(),
                 request.getBirth(),
-                request.getId(),
+                request.getLoginId(),
                 request.getPassword()
         );
 
@@ -35,12 +31,30 @@ public class AuthService {
 
         // 응답 데이터 반환
         return SignupResponseDTO.builder()
-//                .status("success")
-//                .message("회원가입이 완료되었습니다.")
+                .message("회원가입이 완료되었습니다.")
                 .userId(userId)
                 .name(request.getName())
-                .id(request.getId())
+                .loginId(request.getLoginId())
                 .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    /** 로그인 */
+    public LoginResponseDTO login(LoginRequestDTO request) {
+        UserInfo user = authMapper.findById(request.getLoginId());
+
+        if (user == null) {
+            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+        }
+
+        if (!user.getPassword().equals(request.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        return LoginResponseDTO.builder()
+                .message("로그인에 성공했습니다.")
+                .loginId(user.getLoginId())
+                .name(user.getUsername())
                 .build();
     }
 }

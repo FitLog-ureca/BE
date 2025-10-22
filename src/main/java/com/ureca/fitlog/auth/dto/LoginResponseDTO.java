@@ -1,14 +1,14 @@
 package com.ureca.fitlog.auth.dto;
 
-
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class UserInfo {
-    private Long userId;
+@Builder
+public class LoginResponseDTO {
+    private String message;
     private String loginId;
-    private String username;
-    private String password;
+    private String name;
 }

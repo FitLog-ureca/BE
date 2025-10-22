@@ -10,8 +10,9 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 public class SignupResponseDTO {
+    private String message;
     private Long userId;
     private String name;
-    private String id;
+    private String loginId;
     private LocalDateTime createdAt;
 }

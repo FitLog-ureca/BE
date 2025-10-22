@@ -11,10 +11,10 @@ public interface AuthMapper {
 
     void insertUser(@Param("name") String name,
                     @Param("birth") String birth,
-                    @Param("id") String id,
+                    @Param("loginId") String loginId,
                     @Param("password") String password);
 
     Long findLastInsertId();
 
-    Optional<UserInfo> findByUserId(String id);
+    UserInfo findById(@Param("loginId") String loginId);
 }

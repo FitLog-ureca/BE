@@ -1,6 +1,8 @@
 package com.ureca.fitlog.auth.controller;
 
 
+import com.ureca.fitlog.auth.dto.LoginRequestDTO;
+import com.ureca.fitlog.auth.dto.LoginResponseDTO;
 import com.ureca.fitlog.auth.dto.SignupRequestDTO;
 import com.ureca.fitlog.auth.dto.SignupResponseDTO;
 import com.ureca.fitlog.auth.service.AuthService;
@@ -22,5 +24,11 @@ public class AuthController {
     public ResponseEntity<SignupResponseDTO> signup(@RequestBody SignupRequestDTO request) {
         SignupResponseDTO response = authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
+    LoginResponseDTO response = authService.login(request);
+    return ResponseEntity.ok(response);
     }
 }

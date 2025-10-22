@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -15,5 +16,6 @@ public interface TodoMapper {
     int updateTodoCompletion(@Param("todoId") Long todoId, @Param("isCompleted") Boolean isCompleted);
     int updateTodo(TodoRequestDTO dto);
     int deleteTodoById(@Param("todoId") Long todoId);
+    LocalDateTime findCreatedAtById(Long todoId);
 }
 

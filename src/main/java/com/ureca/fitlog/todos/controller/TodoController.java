@@ -1,8 +1,8 @@
-package com.ureca.fitlog.controller;
+package com.ureca.fitlog.todos.controller;
 
-import com.ureca.fitlog.dto.TodoRequestDTO;
-import com.ureca.fitlog.dto.TodoResponseDTO;
-import com.ureca.fitlog.service.TodoService;
+import com.ureca.fitlog.todos.dto.TodoRequestDTO;
+import com.ureca.fitlog.todos.dto.TodoResponseDTO;
+import com.ureca.fitlog.todos.service.TodoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +41,7 @@ public class TodoController {
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateTodo(
             @PathVariable("id") Long todoId,
-            @RequestBody TodoRequestDTO dto) {
+            @RequestBody com.ureca.fitlog.todos.dto.TodoRequestDTO dto) {
 
         dto.setTodoId(todoId);
         Map<String, Object> response = todoService.updateTodo(dto);

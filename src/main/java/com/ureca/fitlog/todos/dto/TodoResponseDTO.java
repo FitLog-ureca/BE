@@ -1,4 +1,4 @@
-package com.ureca.fitlog.dto;
+package com.ureca.fitlog.todos.dto;
 
 import lombok.Getter;
 import lombok.Setter;

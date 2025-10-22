@@ -3,11 +3,11 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.ureca.fitlog.mapper.TodoMapper">
+<mapper namespace="com.ureca.fitlog.todos.mapper.TodoMapper">
 
     <!-- todo 생성 -->
     <insert id="insertTodo"
-            parameterType="com.ureca.fitlog.dto.TodoRequestDTO"
+            parameterType="com.ureca.fitlog.todos.dto.TodoRequestDTO"
             useGeneratedKeys="true"
             keyProperty="todoId">
         INSERT INTO todos (
@@ -26,7 +26,7 @@
     <!-- 날짜별 투두 조회 -->
     <select id="findTodosByDate"
             parameterType="java.time.LocalDate"
-            resultType="com.ureca.fitlog.dto.TodoResponseDTO$TodoItem">
+            resultType="com.ureca.fitlog.todos.dto.TodoResponseDTO$TodoItem">
         SELECT
             t.todo_id AS todoId,
             t.exercise_id AS exerciseId,
@@ -54,7 +54,7 @@
 
     <!-- 투두 수정 -->
     <update id="updateTodo"
-            parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
+            parameterType="com.ureca.fitlog.todos.dto.TodoRequestDTO">
         UPDATE todos
         SET
             date = #{date},

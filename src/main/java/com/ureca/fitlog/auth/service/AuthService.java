@@ -57,4 +57,11 @@ public class AuthService {
                 .name(user.getUsername())
                 .build();
     }
+
+    /** 로그아웃 */
+    public LogoutResponseDTO logout() {
+        return LogoutResponseDTO.builder()
+                .message("로그아웃이 완료되었습니다.")
+                .build();
+    }
 }

@@ -1,12 +1,10 @@
 package com.ureca.fitlog.auth.controller;
 
 
-import com.ureca.fitlog.auth.dto.LoginRequestDTO;
-import com.ureca.fitlog.auth.dto.LoginResponseDTO;
-import com.ureca.fitlog.auth.dto.SignupRequestDTO;
-import com.ureca.fitlog.auth.dto.SignupResponseDTO;
+import com.ureca.fitlog.auth.dto.*;
 import com.ureca.fitlog.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,4 +29,10 @@ public class AuthController {
     LoginResponseDTO response = authService.login(request);
     return ResponseEntity.ok(response);
     }
-}
+
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponseDTO> logout() {
+        LogoutResponseDTO response = authService.logout();
+        return ResponseEntity.ok(response);
+    }
+ }

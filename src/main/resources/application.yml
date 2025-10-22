@@ -5,9 +5,20 @@ spring:
     username: root
     password: urecaureca
 
+springdoc:
+  api-docs:
+    path: /api-docs      # (선택) JSON 명세 URL
+  swagger-ui:
+    path: /swagger-ui    # (선택) UI 접근 URL
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.ureca.fitlog.domain
+  type-aliases-package: com.ureca.fitlog.dto
 
 logging:
   level:

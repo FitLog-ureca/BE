@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.ureca.fitlog.mapper")
+@MapperScan("com.ureca.fitlog.todos.mapper")
 public class FitLogApplication {
 
 	public static void main(String[] args) {

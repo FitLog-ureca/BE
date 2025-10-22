@@ -1,8 +1,9 @@
-package com.ureca.fitlog.dto;
+package com.ureca.fitlog.todos.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -22,5 +23,6 @@ public class TodoResponseDTO {
         private Integer repsTarget;  // 세트당 목표 횟수 (또는 유산소 시간)
         private Integer restTime;    // 총 휴식시간
         private Boolean isCompleted; // 완료 여부
+        private LocalDateTime createdAt;
     }
 }

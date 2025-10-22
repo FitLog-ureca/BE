@@ -4,15 +4,17 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.ureca.fitlog.mapper.TodoMapper">
+
     <!-- todo 생성 -->
-    <insert id="insertTodo" parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
+    <insert id="insertTodo"
+            parameterType="com.ureca.fitlog.dto.TodoRequestDTO"
+            useGeneratedKeys="true"
+            keyProperty="todoId">
         INSERT INTO todos (
         user_id, exercise_id, date, sets_number, reps_target, rest_time, is_completed
         )
         VALUES (
-        --
-        1,
-
+        1,                       <!-- 임시 유저 ID -->
         #{exerciseId},
         #{date},
         #{setsNumber},
@@ -23,10 +25,12 @@
     </insert>
 
     <!-- 날짜별 투두 조회 -->
-    <select id="findTodosByDate" parameterType="java.time.LocalDate"
+    <select id="findTodosByDate"
+            parameterType="java.time.LocalDate"
             resultType="com.ureca.fitlog.dto.TodoResponseDTO$TodoItem">
         SELECT
             t.todo_id AS todoId,
+            t.exercise_id AS exerciseId,
             e.name AS exerciseName,
             t.sets_number AS setsNumber,
             t.reps_target AS repsTarget,
@@ -46,7 +50,8 @@
     </update>
 
     <!-- 투두 수정 -->
-    <update id="updateTodo" parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
+    <update id="updateTodo"
+            parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
         UPDATE todos
         SET
             date = #{date},
@@ -58,9 +63,11 @@
             updated_at = CURRENT_TIMESTAMP
         WHERE todo_id = #{todoId};
     </update>
+
     <!-- 삭제 -->
     <delete id="deleteTodoById">
         DELETE FROM todos
         WHERE todo_id = #{todoId};
     </delete>
+
 </mapper>

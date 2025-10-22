@@ -16,6 +16,7 @@ public class TodoResponseDTO {
     @Setter
     public static class TodoItem {
         private Long todoId;         // 투두 ID
+        private Long exerciseId;     // 운동 ID
         private String exerciseName; // 운동 이름
         private Integer setsNumber;  // 세트 수
         private Integer repsTarget;  // 세트당 목표 횟수 (또는 유산소 시간)

@@ -23,10 +23,7 @@ public class TodoService {
 
         Map<String, Object> response = new HashMap<>();
         response.put("date", dto.getDate());
-        response.put("setsNumber", dto.getSetsNumber());
-        response.put("repsTarget", dto.getRepsTarget());
-        response.put("restTime", dto.getRestTime());
-        response.put("isCompleted", false);
+        response.put("todoId", dto.getTodoId());
         response.put("message", "TodoList가 성공적으로 생성되었습니다.");
         return response;
     }

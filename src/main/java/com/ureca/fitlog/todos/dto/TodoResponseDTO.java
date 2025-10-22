@@ -3,26 +3,25 @@ package com.ureca.fitlog.todos.dto;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
 public class TodoResponseDTO {
     private LocalDate date;          // 날짜
-    private List<TodoItem> todos;    // 투두 목록
-    private String message;          // 응답 메시지
+    private List<TodoItem> todos;    // 투두 리스트
+    private String message;
 
     @Getter
     @Setter
     public static class TodoItem {
-        private Long todoId;         // 투두 ID
-        private Long exerciseId;     // 운동 ID
-        private String exerciseName; // 운동 이름
-        private Integer setsNumber;  // 세트 수
-        private Integer repsTarget;  // 세트당 목표 횟수 (또는 유산소 시간)
-        private Integer restTime;    // 총 휴식시간
-        private Boolean isCompleted; // 완료 여부
-        private LocalDateTime createdAt;
+        private Long todoId;
+        private Long exerciseId;
+        private String exerciseName;
+        private Integer setsNumber;
+        private Integer repsTarget;
+        private Integer restTime;
+        private Boolean isCompleted;  // 세트별 완료 여부
+        private Boolean isDone;       // ✅ 하루 전체 완료 여부
     }
 }

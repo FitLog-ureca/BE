@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +20,11 @@ public class TodoService {
     /** 투두 생성 */
     public Map<String, Object> createTodo(TodoRequestDTO dto) {
         todoMapper.insertTodo(dto);
-        LocalDateTime createdAt = todoMapper.findCreatedAtById(dto.getTodoId());
         Map<String, Object> response = new HashMap<>();
         response.put("date", dto.getDate());
         response.put("todoId", dto.getTodoId());
-        response.put("createdAt", createdAt);
         response.put("isCompleted", false);
+        response.put("isDone", false); // ✅ 하루 완료 상태 초기값
         response.put("message", "TodoList가 성공적으로 생성되었습니다.");
         return response;
     }
@@ -42,6 +40,7 @@ public class TodoService {
                 : "TodoList가 성공적으로 조회되었습니다.");
         return response;
     }
+
     /** 투두 완료 체크 */
     public Map<String, Object> updateTodoCompletion(Long todoId, Boolean isCompleted) {
         int updated = todoMapper.updateTodoCompletion(todoId, isCompleted);
@@ -55,6 +54,7 @@ public class TodoService {
         }
         return response;
     }
+
     /** 투두 수정 */
     public Map<String, Object> updateTodo(TodoRequestDTO dto) {
         int updated = todoMapper.updateTodo(dto);

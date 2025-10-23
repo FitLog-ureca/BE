@@ -1,7 +1,6 @@
 package com.ureca.fitlog.todos.controller;
 
 import com.ureca.fitlog.todos.dto.TodoRequestDTO;
-import com.ureca.fitlog.todos.dto.TodoResponseDTO;
 import com.ureca.fitlog.todos.service.TodoService;
 import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,15 +26,8 @@ public class TodoController {
         return ResponseEntity.ok(todoService.createTodo(requestDto));
     }
 
-    /** 날짜별 투두 조회 */
-    @GetMapping
-    public ResponseEntity<TodoResponseDTO> getTodosByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(todoService.getTodosByDate(date));
-    }
-
     /** 운동 완료 버튼 (해당 날짜의 모든 todo_id의 is_done을 true로 전체 변경) */
-    @PatchMapping("/date/{date}/done")
+    @PatchMapping("/done/{date}")
     public ResponseEntity<Map<String, Object>> updateTodosDoneStatus(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
@@ -54,7 +46,7 @@ public class TodoController {
     }
 
     /** 개별 세트 완료 (is_completed 변경 — 명시적 true/false만 허용) */
-    @PatchMapping("/{id}/complete")
+    @PatchMapping("/complete/{id}")
     public ResponseEntity<Map<String, Object>> toggleTodoCompletion(@PathVariable("id") Long todoId) {
         return ResponseEntity.ok(todoService.updateTodoCompletion(todoId));
     }
@@ -75,7 +67,7 @@ public class TodoController {
     }
 
     /** ✅ 세트별 휴식시간 기록 (초 단위) */
-    @PatchMapping("/{id}/rest-time")
+    @PatchMapping("/rest-time/{id}")
     public ResponseEntity<Map<String, Object>> updateRestTime(
             @PathVariable("id") Long todoId,
             @RequestBody Map<String, Integer> body) {

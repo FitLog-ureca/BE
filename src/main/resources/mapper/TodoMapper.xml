@@ -25,26 +25,6 @@
                );
     </insert>
 
-    <!-- 날짜별 투두 조회 -->
-    <select id="findTodosByDate"
-            parameterType="java.time.LocalDate"
-            resultType="com.ureca.fitlog.todos.dto.TodoResponseDTO$TodoItem">
-        SELECT
-            t.todo_id AS todoId,
-            t.exercise_id AS exerciseId,
-            e.name AS exerciseName,
-            t.sets_number AS setsNumber,
-            t.reps_target AS repsTarget,
-            t.rest_time AS restTime,
-            t.is_completed AS isCompleted,
-            t.is_done AS isDone,
-            t.created_at AS createdAt
-        FROM todos t
-                 JOIN exercises e ON t.exercise_id = e.exercise_id
-        WHERE t.date = #{date}
-        ORDER BY t.todo_id ASC;
-    </select>
-
     <!-- 완료 체크 -->
     <select id="getIsCompletedById" resultType="boolean">
         SELECT is_completed FROM todos WHERE todo_id = #{todoId}
@@ -77,22 +57,12 @@
         DELETE FROM todos WHERE todo_id = #{todoId};
     </delete>
 
-    <!-- ✅ 하루 완료 버튼(is_done) 업데이트 -->
+    <!-- 하루 완료 버튼(is_done) 업데이트 -->
     <update id="updateTodosDoneStatus">
         UPDATE todos
         SET is_done = #{isDone}
         WHERE date = #{date};
     </update>
-
-    <!-- ✅ 하루 완료 여부 확인 -->
-    <select id="existsTodosDoneTrueByDate"
-            parameterType="java.time.LocalDate"
-            resultType="boolean">
-        SELECT COUNT(*) > 0
-        FROM todos
-        WHERE date = #{date}
-          AND is_done = TRUE;
-    </select>
 
     <!-- 참고용 통계 -->
     <select id="countTodosByDate" parameterType="java.time.LocalDate" resultType="int">

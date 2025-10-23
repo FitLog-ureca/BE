@@ -20,8 +20,8 @@
                    #{setsNumber},
                    #{repsTarget},
                    #{restTime},
-                   #{isCompleted},
-                   #{isDone}
+                   IFNULL(#{isCompleted}, false),
+                   IFNULL(#{isDone}, false)
                );
     </insert>
 

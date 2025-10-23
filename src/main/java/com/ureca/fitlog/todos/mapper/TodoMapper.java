@@ -12,7 +12,6 @@ import java.util.List;
 public interface TodoMapper {
 
     void insertTodo(TodoRequestDTO dto);
-    List<TodoResponseDTO.TodoItem> findTodosByDate(@Param("date") LocalDate date);
     Boolean getIsCompletedById(Long todoId);
     int updateTodoCompletion(@Param("todoId") Long todoId, @Param("isCompleted") Boolean isCompleted);
     int updateTodo(TodoRequestDTO dto);

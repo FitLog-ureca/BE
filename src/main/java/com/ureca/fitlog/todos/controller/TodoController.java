@@ -1,7 +1,6 @@
 package com.ureca.fitlog.todos.controller;
 
 import com.ureca.fitlog.todos.dto.TodoRequestDTO;
-import com.ureca.fitlog.todos.dto.TodoResponseDTO;
 import com.ureca.fitlog.todos.service.TodoService;
 import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +24,6 @@ public class TodoController {
     @PostMapping("/create")
     public ResponseEntity<?> createTodo(@RequestBody TodoRequestDTO requestDto) {
         return ResponseEntity.ok(todoService.createTodo(requestDto));
-    }
-
-    /** 날짜별 투두 조회 */
-    @GetMapping
-    public ResponseEntity<TodoResponseDTO> getTodosByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(todoService.getTodosByDate(date));
     }
 
     /** 운동 완료 버튼 (해당 날짜의 모든 todo_id의 is_done을 true로 전체 변경) */

@@ -22,7 +22,6 @@
         FROM todos t
                  JOIN exercises e ON t.exercise_id = e.exercise_id
         WHERE t.date = #{date}
-          AND t.is_completed = TRUE
         ORDER BY t.todo_id ASC
     </select>
 

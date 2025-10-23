@@ -1,14 +1,11 @@
 package com.ureca.fitlog.todos.service;
 
 import com.ureca.fitlog.todos.dto.TodoRequestDTO;
-import com.ureca.fitlog.todos.dto.TodoResponseDTO;
 import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -27,18 +24,6 @@ public class TodoService {
         response.put("isDone", false); // ✅ 하루 완료 상태 초기값
         response.put("createdAt", dto.getCreatedAt());
         response.put("message", "TodoList가 성공적으로 생성되었습니다.");
-        return response;
-    }
-
-    /** 날짜별 투두 조회 */
-    public TodoResponseDTO getTodosByDate(LocalDate date) {
-        List<TodoResponseDTO.TodoItem> todos = todoMapper.findTodosByDate(date);
-        TodoResponseDTO response = new TodoResponseDTO();
-        response.setDate(date);
-        response.setTodos(todos);
-        response.setMessage(todos.isEmpty()
-                ? "등록된 Todo가 없습니다."
-                : "TodoList가 성공적으로 조회되었습니다.");
         return response;
     }
 

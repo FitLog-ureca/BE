@@ -1,5 +1,6 @@
 package com.ureca.fitlog.auth.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,4 +10,10 @@ import lombok.Setter;
 @Builder
 public class LogoutResponseDTO {
     private String message;
+
+    public static LogoutResponseDTO of(String message) {
+        return LogoutResponseDTO.builder()
+                .message(message)
+                .build();
+    }
 }

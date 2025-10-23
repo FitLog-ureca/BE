@@ -67,22 +67,88 @@ public class TodoController {
     }
 
     /** ✅ 세트별 휴식시간 기록 (초 단위) */
-    @PatchMapping("/rest-time/{id}")
-    public ResponseEntity<Map<String, Object>> updateRestTime(
-            @PathVariable("id") Long todoId,
-            @RequestBody Map<String, Integer> body) {
-
+    @PatchMapping("/rest/{todoId}")
+    public ResponseEntity<?> updateRestTime(
+            @PathVariable Long todoId,
+            @RequestBody Map<String, Integer> body
+    ) {
         Integer restTime = body.get("restTime");
 
-        // ✅ 예외처리: 값이 없거나 음수일 경우
-        if (restTime == null || restTime < 0) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("message", "restTime 값은 0 이상의 정수여야 합니다.");
-            return ResponseEntity.badRequest().body(error);
+        // 1️⃣ 유효성 검증
+        if (restTime == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", 400,
+                    "error", "INVALID_ARGUMENT",
+                    "message", "restTime은 필수 값입니다."
+            ));
+        }
+        if (restTime < 0 || restTime > 7200) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", 400,
+                    "error", "INVALID_ARGUMENT",
+                    "message", "restTime은 0~7200초 사이여야 합니다."
+            ));
         }
 
-        // ✅ 정상 로직 실행
-        return ResponseEntity.ok(todoService.updateRestTime(todoId, restTime));
+        // 2️⃣ 서비스 실행
+        try {
+            todoService.updateRestTime(todoId, restTime);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "status", 401,
+                    "error", "UNAUTHORIZED",
+                    "message", e.getMessage()
+            ));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "status", 403,
+                    "error", "FORBIDDEN",
+                    "message", e.getMessage()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "status", 404,
+                    "error", "NOT_FOUND",
+                    "message", e.getMessage()
+            ));
+        }
+
+        // 3️⃣ 성공 응답
+        return ResponseEntity.ok(Map.of(
+                "todoId", todoId,
+                "restTime", restTime,
+                "message", "휴식시간이 업데이트되었습니다."
+        ));
     }
 
+    /** ✅ 세트별 휴식시간 초기화 */
+    @DeleteMapping("/rest/reset/{todoId}")
+    public ResponseEntity<?> resetRestTime(@PathVariable Long todoId) {
+        try {
+            todoService.resetRestTime(todoId);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "status", 401,
+                    "error", "UNAUTHORIZED",
+                    "message", e.getMessage()
+            ));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(Map.of(
+                    "status", 403,
+                    "error", "FORBIDDEN",
+                    "message", e.getMessage()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "status", 404,
+                    "error", "NOT_FOUND",
+                    "message", e.getMessage()
+            ));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "todoId", todoId,
+                "message", "휴식시간이 초기화되었습니다."
+        ));
+    }
 }

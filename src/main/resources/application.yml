@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/fitlog
     username: root
-    password: urecaureca
+    password: ureca
 
 springdoc:
   api-docs:

@@ -75,11 +75,19 @@
           AND (is_completed IS NULL OR is_completed = FALSE)
     </select>
 
-    <update id="updateRestTime">
+    <update id="updateRestTime" parameterType="map">
         UPDATE todos
         SET rest_time = #{restTime},
             updated_at = CURRENT_TIMESTAMP
-        WHERE todo_id = #{todoId};
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId};
     </update>
 
+    <update id="resetRestTime" parameterType="map">
+        UPDATE todos
+        SET rest_time = NULL,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId};
+    </update>
 </mapper>

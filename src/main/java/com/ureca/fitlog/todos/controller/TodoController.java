@@ -53,13 +53,23 @@ public class TodoController {
         return ResponseEntity.ok(response);
     }
 
-    /** 개별 완료 체크 */
+    /** ✅ 개별 세트 완료 (is_completed 변경 — 명시적 true/false만 허용) */
     @PatchMapping("/{id}/complete")
     public ResponseEntity<Map<String, Object>> updateTodoCompletion(
             @PathVariable("id") Long todoId,
-            @RequestParam(defaultValue = "true") Boolean isCompleted) {
+            @RequestParam(required = true) Boolean isCompleted) {   // ✅ defaultValue 제거
+
+        // ✅ 예외 처리: 파라미터 누락 시 400 반환
+        if (isCompleted == null) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "isCompleted 파라미터는 반드시 true 또는 false로 지정해야 합니다.");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        // ✅ 정상 처리
         return ResponseEntity.ok(todoService.updateTodoCompletion(todoId, isCompleted));
     }
+
 
     /** 수정 */
     @PutMapping("/{id}")
@@ -75,4 +85,24 @@ public class TodoController {
     public ResponseEntity<Map<String, Object>> deleteTodoById(@PathVariable("id") Long todoId) {
         return ResponseEntity.ok(todoService.deleteTodoById(todoId));
     }
+
+    /** ✅ 세트별 휴식시간 기록 (초 단위) */
+    @PatchMapping("/{id}/rest-time")
+    public ResponseEntity<Map<String, Object>> updateRestTime(
+            @PathVariable("id") Long todoId,
+            @RequestBody Map<String, Integer> body) {
+
+        Integer restTime = body.get("restTime");
+
+        // ✅ 예외처리: 값이 없거나 음수일 경우
+        if (restTime == null || restTime < 0) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "restTime 값은 0 이상의 정수여야 합니다.");
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        // ✅ 정상 로직 실행
+        return ResponseEntity.ok(todoService.updateRestTime(todoId, restTime));
+    }
+
 }

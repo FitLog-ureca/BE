@@ -98,4 +98,12 @@
         WHERE date = #{date}
           AND (is_completed IS NULL OR is_completed = FALSE)
     </select>
+
+    <update id="updateRestTime">
+        UPDATE todos
+        SET rest_time = #{restTime},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE todo_id = #{todoId};
+    </update>
+
 </mapper>

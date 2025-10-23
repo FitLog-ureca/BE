@@ -21,6 +21,9 @@ public interface TodoMapper {
     int updateTodosDoneStatus(@Param("date") LocalDate date, @Param("isDone") Boolean isDone);
     boolean existsTodosDoneTrueByDate(@Param("date") LocalDate date);
 
+    // ✅ 세트별 휴식시간 기록 메서드 추가
+    int updateRestTime(@Param("todoId") Long todoId, @Param("restTime") Integer restTime);
+
     // 참고용
     int countTodosByDate(@Param("date") LocalDate date);
     int countTodosByDateAndNotCompleted(@Param("date") LocalDate date);

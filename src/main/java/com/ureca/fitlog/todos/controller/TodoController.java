@@ -34,11 +34,13 @@ public class TodoController {
         return ResponseEntity.ok(todoService.getTodosByDate(date));
     }
 
-    /** ✅ 운동 완료 버튼 (is_done 전체 변경) */
-    @PatchMapping("/done")
+    /** 운동 완료 버튼 (해당 날짜의 모든 todo_id의 is_done을 true로 전체 변경) */
+    @PatchMapping("/date/{date}/done")
     public ResponseEntity<Map<String, Object>> updateTodosDoneStatus(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(defaultValue = "true") Boolean isDone) {
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        // 기본적으로 true로 처리
+        boolean isDone = true;
 
         int updated = todoMapper.updateTodosDoneStatus(date, isDone);
 
@@ -46,9 +48,7 @@ public class TodoController {
         response.put("date", date);
         response.put("isDone", isDone);
         response.put("updatedCount", updated);
-        response.put("message", isDone
-                ? "운동 완료 상태로 변경되었습니다."
-                : "운동 완료 상태가 해제되었습니다.");
+        response.put("message", "해당 날짜의 운동이 완료 상태로 변경되었습니다.");
 
         return ResponseEntity.ok(response);
     }

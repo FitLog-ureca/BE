@@ -46,9 +46,14 @@
     </select>
 
     <!-- 완료 체크 -->
+    <select id="getIsCompletedById" resultType="boolean">
+        SELECT is_completed FROM todos WHERE todo_id = #{todoId}
+    </select>
+
     <update id="updateTodoCompletion">
         UPDATE todos
-        SET is_completed = #{isCompleted}
+        SET is_completed = #{isCompleted},
+            updated_at = CURRENT_TIMESTAMP
         WHERE todo_id = #{todoId};
     </update>
 

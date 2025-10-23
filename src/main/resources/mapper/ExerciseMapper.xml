@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ureca.fitlog.exercise.mapper.ExerciseMapper">
+
+    <!-- 완료된 운동 목록 + 항목별 칼로리 -->
+    <select id="findCompletedExercisesByDate"
+            parameterType="java.time.LocalDate"
+            resultType="com.ureca.fitlog.exercise.dto.ExerciseResponseDTO$ExerciseItem">
+        SELECT
+            t.todo_id AS todoId,
+            t.exercise_id AS exerciseId,
+            e.name AS exerciseName,
+            t.sets_number AS setsNumber,
+            t.reps_target AS repsTarget,
+            t.rest_time AS restTime,
+            t.is_completed AS isCompleted,
+            e.default_calories_per_set AS caloriesPerRep,
+            (t.sets_number * t.reps_target * e.default_calories_per_set) AS totalCalories
+        FROM todos t
+                 JOIN exercises e ON t.exercise_id = e.exercise_id
+        WHERE t.date = #{date}
+          AND t.is_completed = TRUE
+        ORDER BY t.todo_id ASC
+    </select>
+
+    <!-- 해당 날짜 총 소모 칼로리 -->
+    <select id="findTotalCaloriesByDate"
+            parameterType="java.time.LocalDate"
+            resultType="double">
+        SELECT IFNULL(SUM(t.sets_number * t.reps_target * e.default_calories_per_set), 0)
+        FROM todos t
+                 JOIN exercises e ON t.exercise_id = e.exercise_id
+        WHERE t.date = #{date}
+          AND t.is_completed = TRUE
+    </select>
+
+</mapper>

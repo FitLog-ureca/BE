@@ -3,31 +3,32 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.ureca.fitlog.mapper.TodoMapper">
+<mapper namespace="com.ureca.fitlog.todos.mapper.TodoMapper">
 
-    <!-- todo 생성 -->
+    <!-- 투두 생성 -->
     <insert id="insertTodo"
-            parameterType="com.ureca.fitlog.dto.TodoRequestDTO"
+            parameterType="com.ureca.fitlog.todos.dto.TodoRequestDTO"
             useGeneratedKeys="true"
             keyProperty="todoId">
         INSERT INTO todos (
-        user_id, exercise_id, date, sets_number, reps_target, rest_time, is_completed
+            user_id, exercise_id, date, sets_number, reps_target, rest_time, is_completed, is_done
         )
         VALUES (
-        1,                       <!-- 임시 유저 ID -->
-        #{exerciseId},
-        #{date},
-        #{setsNumber},
-        #{repsTarget},
-        #{restTime},
-        #{isCompleted}
-        );
+                   1,
+                   #{exerciseId},
+                   #{date},
+                   #{setsNumber},
+                   #{repsTarget},
+                   #{restTime},
+                   #{isCompleted},
+                   #{isDone}
+               );
     </insert>
 
     <!-- 날짜별 투두 조회 -->
     <select id="findTodosByDate"
             parameterType="java.time.LocalDate"
-            resultType="com.ureca.fitlog.dto.TodoResponseDTO$TodoItem">
+            resultType="com.ureca.fitlog.todos.dto.TodoResponseDTO$TodoItem">
         SELECT
             t.todo_id AS todoId,
             t.exercise_id AS exerciseId,
@@ -35,23 +36,24 @@
             t.sets_number AS setsNumber,
             t.reps_target AS repsTarget,
             t.rest_time AS restTime,
-            t.is_completed AS isCompleted
+            t.is_completed AS isCompleted,
+            t.is_done AS isDone
         FROM todos t
                  JOIN exercises e ON t.exercise_id = e.exercise_id
         WHERE t.date = #{date}
         ORDER BY t.todo_id ASC;
     </select>
 
-    <!-- 완료 상태 업데이트 -->
+    <!-- 완료 체크 -->
     <update id="updateTodoCompletion">
         UPDATE todos
         SET is_completed = #{isCompleted}
         WHERE todo_id = #{todoId};
     </update>
 
-    <!-- 투두 수정 -->
+    <!-- 수정 -->
     <update id="updateTodo"
-            parameterType="com.ureca.fitlog.dto.TodoRequestDTO">
+            parameterType="com.ureca.fitlog.todos.dto.TodoRequestDTO">
         UPDATE todos
         SET
             date = #{date},
@@ -66,8 +68,42 @@
 
     <!-- 삭제 -->
     <delete id="deleteTodoById">
-        DELETE FROM todos
-        WHERE todo_id = #{todoId};
+        DELETE FROM todos WHERE todo_id = #{todoId};
     </delete>
+
+    <!-- ✅ 하루 완료 버튼(is_done) 업데이트 -->
+    <update id="updateTodosDoneStatus">
+        UPDATE todos
+        SET is_done = #{isDone}
+        WHERE date = #{date};
+    </update>
+
+    <!-- ✅ 하루 완료 여부 확인 -->
+    <select id="existsTodosDoneTrueByDate"
+            parameterType="java.time.LocalDate"
+            resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM todos
+        WHERE date = #{date}
+          AND is_done = TRUE;
+    </select>
+
+    <!-- 참고용 통계 -->
+    <select id="countTodosByDate" parameterType="java.time.LocalDate" resultType="int">
+        SELECT COUNT(*) FROM todos WHERE date = #{date}
+    </select>
+
+    <select id="countTodosByDateAndNotCompleted" parameterType="java.time.LocalDate" resultType="int">
+        SELECT COUNT(*) FROM todos
+        WHERE date = #{date}
+          AND (is_completed IS NULL OR is_completed = FALSE)
+    </select>
+
+    <update id="updateRestTime">
+        UPDATE todos
+        SET rest_time = #{restTime},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE todo_id = #{todoId};
+    </update>
 
 </mapper>

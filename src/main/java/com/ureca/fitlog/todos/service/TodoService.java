@@ -1,8 +1,8 @@
-package com.ureca.fitlog.service;
+package com.ureca.fitlog.todos.service;
 
-import com.ureca.fitlog.dto.TodoRequestDTO;
-import com.ureca.fitlog.dto.TodoResponseDTO;
-import com.ureca.fitlog.mapper.TodoMapper;
+import com.ureca.fitlog.todos.dto.TodoRequestDTO;
+import com.ureca.fitlog.todos.dto.TodoResponseDTO;
+import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +20,11 @@ public class TodoService {
     /** 투두 생성 */
     public Map<String, Object> createTodo(TodoRequestDTO dto) {
         todoMapper.insertTodo(dto);
-
         Map<String, Object> response = new HashMap<>();
         response.put("date", dto.getDate());
         response.put("todoId", dto.getTodoId());
+        response.put("isCompleted", false);
+        response.put("isDone", false); // ✅ 하루 완료 상태 초기값
         response.put("message", "TodoList가 성공적으로 생성되었습니다.");
         return response;
     }
@@ -39,19 +40,27 @@ public class TodoService {
                 : "TodoList가 성공적으로 조회되었습니다.");
         return response;
     }
-    /** 투두 완료 체크 */
+
+    /** ✅ 개별 세트 완료 (is_completed true/false 명시적 반영) */
     public Map<String, Object> updateTodoCompletion(Long todoId, Boolean isCompleted) {
         int updated = todoMapper.updateTodoCompletion(todoId, isCompleted);
+
         Map<String, Object> response = new HashMap<>();
+        response.put("todoId", todoId);
+        response.put("isCompleted", isCompleted);
+
         if (updated > 0) {
-            response.put("todoId", todoId);
-            response.put("isCompleted", isCompleted);
-            response.put("message", "TodoList가 성공적으로 갱신되었습니다.");
+            response.put("message", isCompleted
+                    ? "세트가 완료 처리되었습니다."
+                    : "세트 완료가 해제되었습니다.");
         } else {
-            response.put("message", "해당 Todo가 존재하지 않습니다.");
+            response.put("message", "해당 투두 항목을 찾을 수 없습니다.");
         }
+
         return response;
     }
+
+
     /** 투두 수정 */
     public Map<String, Object> updateTodo(TodoRequestDTO dto) {
         int updated = todoMapper.updateTodo(dto);
@@ -78,4 +87,18 @@ public class TodoService {
         }
         return response;
     }
+
+    public Map<String, Object> updateRestTime(Long todoId, Integer restTime) {
+        int updated = todoMapper.updateRestTime(todoId, restTime);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("todoId", todoId);
+        response.put("restTime", restTime);
+        response.put("message", updated > 0
+                ? "세트의 휴식시간이 기록되었습니다."
+                : "해당 투두 항목을 찾을 수 없습니다.");
+
+        return response;
+    }
+
 }

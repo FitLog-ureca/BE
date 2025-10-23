@@ -1,0 +1,108 @@
+package com.ureca.fitlog.todos.controller;
+
+import com.ureca.fitlog.todos.dto.TodoRequestDTO;
+import com.ureca.fitlog.todos.dto.TodoResponseDTO;
+import com.ureca.fitlog.todos.service.TodoService;
+import com.ureca.fitlog.todos.mapper.TodoMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/todos")
+public class TodoController {
+
+    private final TodoService todoService;
+    private final TodoMapper todoMapper;
+
+    /** 날짜별 투두 생성 */
+    @PostMapping("/create")
+    public ResponseEntity<?> createTodo(@RequestBody TodoRequestDTO requestDto) {
+        return ResponseEntity.ok(todoService.createTodo(requestDto));
+    }
+
+    /** 날짜별 투두 조회 */
+    @GetMapping
+    public ResponseEntity<TodoResponseDTO> getTodosByDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(todoService.getTodosByDate(date));
+    }
+
+    /** ✅ 운동 완료 버튼 (is_done 전체 변경) */
+    @PatchMapping("/done")
+    public ResponseEntity<Map<String, Object>> updateTodosDoneStatus(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(defaultValue = "true") Boolean isDone) {
+
+        int updated = todoMapper.updateTodosDoneStatus(date, isDone);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("date", date);
+        response.put("isDone", isDone);
+        response.put("updatedCount", updated);
+        response.put("message", isDone
+                ? "운동 완료 상태로 변경되었습니다."
+                : "운동 완료 상태가 해제되었습니다.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /** ✅ 개별 세트 완료 (is_completed 변경 — 명시적 true/false만 허용) */
+    @PatchMapping("/{id}/complete")
+    public ResponseEntity<Map<String, Object>> updateTodoCompletion(
+            @PathVariable("id") Long todoId,
+            @RequestParam(required = true) Boolean isCompleted) {   // ✅ defaultValue 제거
+
+        // ✅ 예외 처리: 파라미터 누락 시 400 반환
+        if (isCompleted == null) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "isCompleted 파라미터는 반드시 true 또는 false로 지정해야 합니다.");
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        // ✅ 정상 처리
+        return ResponseEntity.ok(todoService.updateTodoCompletion(todoId, isCompleted));
+    }
+
+
+    /** 수정 */
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> updateTodo(
+            @PathVariable("id") Long todoId,
+            @RequestBody TodoRequestDTO dto) {
+        dto.setTodoId(todoId);
+        return ResponseEntity.ok(todoService.updateTodo(dto));
+    }
+
+    /** 삭제 */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> deleteTodoById(@PathVariable("id") Long todoId) {
+        return ResponseEntity.ok(todoService.deleteTodoById(todoId));
+    }
+
+    /** ✅ 세트별 휴식시간 기록 (초 단위) */
+    @PatchMapping("/{id}/rest-time")
+    public ResponseEntity<Map<String, Object>> updateRestTime(
+            @PathVariable("id") Long todoId,
+            @RequestBody Map<String, Integer> body) {
+
+        Integer restTime = body.get("restTime");
+
+        // ✅ 예외처리: 값이 없거나 음수일 경우
+        if (restTime == null || restTime < 0) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("message", "restTime 값은 0 이상의 정수여야 합니다.");
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        // ✅ 정상 로직 실행
+        return ResponseEntity.ok(todoService.updateRestTime(todoId, restTime));
+    }
+
+}

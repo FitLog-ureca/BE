@@ -3,11 +3,11 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/fitlog
     username: root
-    password: ureca
+    password: urecaureca
 
 springdoc:
   api-docs:
-    path: /api-docs      # (선택) JSON 명세 URL
+    path: /v3/api-docs      # (선택) JSON 명세 URL
   swagger-ui:
     path: /swagger-ui    # (선택) UI 접근 URL
     operations-sorter: method
@@ -16,11 +16,13 @@ springdoc:
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
 
-# mybatis
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
-  #type-aliases-package: com.ureca.fitlog.domain 아래의 행은 10/22 16:34에 수정함
-  type-aliases-package: com.ureca.fitlog.todos.dto, com.ureca.fitlog.exercise.dto, com.ureca.fitlog.calendar.dto
+  type-aliases-package: com.ureca.fitlog.dto
+
+jwt:
+  expiration: 86400000
+  secret: 914da3709fcbc4284f731eae7f54503cc6f2010ae743d130fb74006401461ec5
 
 logging:
   level:

@@ -3,6 +3,7 @@ package com.ureca.fitlog.todos.dto;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -23,5 +24,6 @@ public class TodoResponseDTO {
         private Integer restTime;
         private Boolean isCompleted;  // 세트별 완료 여부
         private Boolean isDone;       // ✅ 하루 전체 완료 여부
+        private LocalDateTime createdAt;
     }
 }

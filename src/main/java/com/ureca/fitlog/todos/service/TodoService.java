@@ -25,6 +25,7 @@ public class TodoService {
         response.put("todoId", dto.getTodoId());
         response.put("isCompleted", false);
         response.put("isDone", false); // ✅ 하루 완료 상태 초기값
+        response.put("createdAt", dto.getCreatedAt());
         response.put("message", "TodoList가 성공적으로 생성되었습니다.");
         return response;
     }

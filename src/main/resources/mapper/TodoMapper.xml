@@ -37,7 +37,8 @@
             t.reps_target AS repsTarget,
             t.rest_time AS restTime,
             t.is_completed AS isCompleted,
-            t.is_done AS isDone
+            t.is_done AS isDone,
+            t.created_at AS createdAt
         FROM todos t
                  JOIN exercises e ON t.exercise_id = e.exercise_id
         WHERE t.date = #{date}

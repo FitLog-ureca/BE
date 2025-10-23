@@ -20,6 +20,10 @@ mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   type-aliases-package: com.ureca.fitlog.dto
 
+jwt:
+  expiration: 86400000
+  secret: 914da3709fcbc4284f731eae7f54503cc6f2010ae743d130fb74006401461ec5
+
 logging:
   level:
     org.mybatis: DEBUG

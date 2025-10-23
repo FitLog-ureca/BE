@@ -11,4 +11,5 @@ public class LoginResponseDTO {
     private String message;
     private String loginId;
     private String name;
+    private String token;
 }

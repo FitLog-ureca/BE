@@ -42,16 +42,22 @@ public class TodoService {
         return response;
     }
 
-    /** ✅ 개별 세트 완료 (is_completed true/false 명시적 반영) */
-    public Map<String, Object> updateTodoCompletion(Long todoId, Boolean isCompleted) {
-        int updated = todoMapper.updateTodoCompletion(todoId, isCompleted);
+    /** ✅ 개별 세트 완료 토글 (todoId만으로 true/false 자동 반전) */
+    public Map<String, Object> updateTodoCompletion(Long todoId) {
+        // 현재 상태 조회
+        Boolean currentStatus = todoMapper.getIsCompletedById(todoId);
+
+        // null 방지 + 토글 처리
+        Boolean newStatus = (currentStatus != null && currentStatus) ? false : true;
+
+        int updated = todoMapper.updateTodoCompletion(todoId, newStatus);
 
         Map<String, Object> response = new HashMap<>();
         response.put("todoId", todoId);
-        response.put("isCompleted", isCompleted);
+        response.put("isCompleted", newStatus);
 
         if (updated > 0) {
-            response.put("message", isCompleted
+            response.put("message", newStatus
                     ? "세트가 완료 처리되었습니다."
                     : "세트 완료가 해제되었습니다.");
         } else {

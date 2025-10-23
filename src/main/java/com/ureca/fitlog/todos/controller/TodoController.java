@@ -53,23 +53,11 @@ public class TodoController {
         return ResponseEntity.ok(response);
     }
 
-    /** ✅ 개별 세트 완료 (is_completed 변경 — 명시적 true/false만 허용) */
+    /** 개별 세트 완료 (is_completed 변경 — 명시적 true/false만 허용) */
     @PatchMapping("/{id}/complete")
-    public ResponseEntity<Map<String, Object>> updateTodoCompletion(
-            @PathVariable("id") Long todoId,
-            @RequestParam(required = true) Boolean isCompleted) {   // ✅ defaultValue 제거
-
-        // ✅ 예외 처리: 파라미터 누락 시 400 반환
-        if (isCompleted == null) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "isCompleted 파라미터는 반드시 true 또는 false로 지정해야 합니다.");
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-
-        // ✅ 정상 처리
-        return ResponseEntity.ok(todoService.updateTodoCompletion(todoId, isCompleted));
+    public ResponseEntity<Map<String, Object>> toggleTodoCompletion(@PathVariable("id") Long todoId) {
+        return ResponseEntity.ok(todoService.updateTodoCompletion(todoId));
     }
-
 
     /** 수정 */
     @PutMapping("/{id}")

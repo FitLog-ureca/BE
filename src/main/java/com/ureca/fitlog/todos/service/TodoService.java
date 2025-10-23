@@ -13,6 +13,7 @@ import java.util.Map;
 public class TodoService {
 
     private final TodoMapper todoMapper;
+    private final com.ureca.fitlog.auth.mapper.AuthMapper authMapper;
 
     /** 투두 생성 */
     public Map<String, Object> createTodo(TodoRequestDTO dto) {
@@ -81,16 +82,51 @@ public class TodoService {
     }
 
     public Map<String, Object> updateRestTime(Long todoId, Integer restTime) {
-        int updated = todoMapper.updateRestTime(todoId, restTime);
+        // 1️⃣ 현재 로그인한 사용자 정보 가져오기
+        String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
+        if (loginId == null)
+            throw new IllegalStateException("로그인 정보가 없습니다.");
 
+        var user = authMapper.findById(loginId);
+        if (user == null)
+            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
+
+        Long userId = user.getUserId();
+
+        // 2️⃣ 해당 todo가 본인 소유인지 검증하면서 업데이트
+        int updated = todoMapper.updateRestTime(todoId, userId, restTime);
+
+        if (updated == 0) {
+            // 다른 사람의 todo이거나 존재하지 않음
+            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+        }
+
+        // 3️⃣ 성공 응답
         Map<String, Object> response = new HashMap<>();
         response.put("todoId", todoId);
         response.put("restTime", restTime);
-        response.put("message", updated > 0
-                ? "세트의 휴식시간이 기록되었습니다."
-                : "해당 투두 항목을 찾을 수 없습니다.");
+        response.put("message", "휴식시간이 업데이트되었습니다.");
 
         return response;
+    }
+
+    /** ✅ 휴식시간 초기화 */
+    public void resetRestTime(Long todoId) {
+        // 현재 로그인한 사용자 검증
+        String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
+        if (loginId == null)
+            throw new IllegalStateException("로그인 정보가 없습니다.");
+
+        var user = authMapper.findById(loginId);
+        if (user == null)
+            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
+
+        Long userId = user.getUserId();
+
+        // 해당 todo가 본인 소유인지 확인하며 초기화
+        int updated = todoMapper.resetRestTime(todoId, userId);
+        if (updated == 0)
+            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
     }
 
 }

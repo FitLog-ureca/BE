@@ -66,7 +66,7 @@ public class AuthController {
     public ResponseEntity<LogoutResponseDTO> logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("accessToken", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(false); // FIXME: 배포시 true로 변경 필수
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);

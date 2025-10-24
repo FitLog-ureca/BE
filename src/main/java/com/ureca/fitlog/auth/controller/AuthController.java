@@ -29,9 +29,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
         try {
-            LoginResponseDTO dto = authService.login(request);
+            LoginResponseDTO loginResult = authService.login(request);
             // JWT 토큰 생성
-            String token = jwtTokenProvider.createToken(dto.getLoginId());
+            String token = jwtTokenProvider.createToken(loginResult.getLoginId());
             Cookie cookie = new Cookie("accessToken", token);
             cookie.setHttpOnly(true);  // JS 접근 불가
             cookie.setSecure(true);    // HTTPS 전용
@@ -41,14 +41,14 @@ public class AuthController {
 
 
             // Builder로 새 객체 생성
-            LoginResponseDTO responseDto = LoginResponseDTO.builder()
+            LoginResponseDTO responseBody = LoginResponseDTO.builder()
                     .message("로그인에 성공했습니다.")
-                    .loginId(dto.getLoginId())
-                    .name(dto.getName())
+                    .loginId(loginResult.getLoginId())
+                    .name(loginResult.getName())
                     .token(token)
                     .build();
 
-            return ResponseEntity.ok(responseDto);
+            return ResponseEntity.ok(responseBody);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(LoginResponseDTO.builder()

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ureca.fitlog.profile.mapper.ProfileMapper">
+
+    <!-- 프로필 조회 -->
+    <select id="findProfileByLoginId"
+            parameterType="string"
+            resultType="com.ureca.fitlog.profile.dto.ProfileResponseDTO">
+        SELECT
+            username AS name,
+            bio,
+            profile_image AS profileImage,
+            birth_date AS birthDate
+        FROM users
+        WHERE login_id = #{loginId}
+    </select>
+
+    <!-- 프로필 수정 -->
+    <update id="updateProfile"
+            parameterType="map">
+        UPDATE users
+        SET
+            username = #{request.name},
+            birth_date = #{request.birthDate},
+            bio = #{request.bio},
+            profile_image = #{request.profileImage},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE login_id = #{loginId};
+    </update>
+
+</mapper>

@@ -1,5 +1,6 @@
 package com.ureca.fitlog.profile.service;
 
+import com.ureca.fitlog.profile.dto.ProfileRequestDTO;
 import com.ureca.fitlog.profile.dto.ProfileResponseDTO;
 import com.ureca.fitlog.profile.mapper.ProfileMapper;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,14 @@ public class ProfileService {
             profile.calculateAgeFromBirthDate();
         }
         return profile;
+    }
+
+    /** 프로필 수정 */
+    public ProfileResponseDTO updateProfile(String loginId, ProfileRequestDTO request) {
+        int updated = profileMapper.updateProfile(loginId, request);
+        if (updated > 0) {
+            return getProfileByLoginId(loginId);
+        }
+        return null;
     }
 }

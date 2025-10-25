@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface TodoMapper {
@@ -15,13 +16,28 @@ public interface TodoMapper {
     Boolean getIsCompletedById(Long todoId);
     int updateTodoCompletion(@Param("todoId") Long todoId, @Param("isCompleted") Boolean isCompleted);
     int updateTodo(TodoRequestDTO dto);
+    void updateTodoRepsOnly(Map<String, Object> params);
+
+    int countSetsByDateAndExercise(@Param("date") LocalDate date,
+                                   @Param("exerciseId") Long exerciseId);
+
+    /** is_done 관련 추가 */
+    void updateTodosDoneStatus(@Param("date") LocalDate date, @Param("isDone") boolean isDone);
+    int existsTodosDoneTrueByDate(@Param("date") LocalDate date);
+
+    /** todo_id 기준으로 해당 행 삭제 */
     int deleteTodoById(@Param("todoId") Long todoId);
 
-    // ✅ is_done 관련 추가
-    int updateTodosDoneStatus(@Param("date") LocalDate date, @Param("isDone") Boolean isDone);
-    boolean existsTodosDoneTrueByDate(@Param("date") LocalDate date);
+    /** 삭제된 todo의 date, exercise_id 조회 */
+    Map<String, Object> findDateAndExerciseIdByTodoId(@Param("todoId") Long todoId);
 
-    // ✅ 세트별 휴식시간 기록 메서드 추가
+    /** 특정 날짜 + 운동종목(exercise_id)의 sets_number 임시 음수화 */
+    void tempNegateSetsNumbers(@Param("date") LocalDate date, @Param("exerciseId") Long exerciseId);
+
+    /** 특정 날짜 + 운동종목(exercise_id)의 sets_number 재정렬 */
+    void reorderSetsNumbers(@Param("date") LocalDate date, @Param("exerciseId") Long exerciseId);
+
+    /** 세트별 휴식시간 기록 메서드 추가 */
     int updateRestTime(@Param("todoId") Long todoId,
                        @Param("userId") Long userId,
                        @Param("restTime") Integer restTime);

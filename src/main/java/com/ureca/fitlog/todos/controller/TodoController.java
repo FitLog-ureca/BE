@@ -26,23 +26,39 @@ public class TodoController {
         return ResponseEntity.ok(todoService.createTodo(requestDto));
     }
 
-    /** 운동 완료 버튼 (해당 날짜의 모든 todo_id의 is_done을 true로 전체 변경) */
+//    /** 운동 완료 버튼 (해당 날짜의 모든 todo_id의 is_done을 true로 전체 변경) */
+//    @PatchMapping("/done/{date}")
+//    public ResponseEntity<Map<String, Object>> updateTodosDoneStatus(
+//            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+//
+//        // 기본적으로 true로 처리
+//        boolean isDone = true;
+//
+//        int updated = todoMapper.updateTodosDoneStatus(date, isDone);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("date", date);
+//        response.put("isDone", isDone);
+//        response.put("updatedCount", updated);
+//        response.put("message", "해당 날짜의 운동이 완료 상태로 변경되었습니다.");
+//
+//        return ResponseEntity.ok(response);
+//    }
+    /** ✅ 운동 완료 상태 토글 (true ↔ false 자동 전환) */
     @PatchMapping("/done/{date}")
-    public ResponseEntity<Map<String, Object>> updateTodosDoneStatus(
-            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    public ResponseEntity<Map<String, Object>> toggleTodosDoneStatus(
+            @PathVariable LocalDate date
+    ) {
+        boolean newStatus = todoService.toggleTodosDoneStatus(date);
+        String message = newStatus
+                ? "운동 완료 상태로 변경되었습니다."
+                : "운동 완료 상태가 취소되었습니다.";
 
-        // 기본적으로 true로 처리
-        boolean isDone = true;
-
-        int updated = todoMapper.updateTodosDoneStatus(date, isDone);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("date", date);
-        response.put("isDone", isDone);
-        response.put("updatedCount", updated);
-        response.put("message", "해당 날짜의 운동이 완료 상태로 변경되었습니다.");
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of(
+                "date", date,
+                "isDone", newStatus,
+                "message", message
+        ));
     }
 
     /** 개별 세트 완료 (is_completed 변경 — 명시적 true/false만 허용) */
@@ -60,13 +76,25 @@ public class TodoController {
         return ResponseEntity.ok(todoService.updateTodo(dto));
     }
 
-    /** 삭제 */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> deleteTodoById(@PathVariable("id") Long todoId) {
-        return ResponseEntity.ok(todoService.deleteTodoById(todoId));
+    /** 세트당 수행횟수(reps_target)만 수정 */
+    @PatchMapping("/{todoId}/reps")
+    public ResponseEntity<String> updateReps(
+            @PathVariable Long todoId,
+            @RequestParam int repsTarget) {
+        todoService.updateTodoRepsOnly(todoId, repsTarget);
+        return ResponseEntity.ok("세트당 횟수가 수정되었습니다.");
     }
 
-    /** ✅ 세트별 휴식시간 기록 (초 단위) */
+    /** 투두리스트(세트) 삭제 및 sets_number 자동 재정렬 */
+    @DeleteMapping("/{todoId}")
+    public ResponseEntity<Map<String, Object>> deleteTodoById(@PathVariable Long todoId) {
+        todoService.deleteTodoAndReorder(todoId);
+        return ResponseEntity.ok(Map.of(
+                "message", "투두리스트가 삭제되고 sets_number가 재정렬되었습니다."
+        ));
+    }
+
+    /** 세트별 휴식시간 기록 (초 단위) */
     @PatchMapping("/rest/{todoId}")
     public ResponseEntity<?> updateRestTime(
             @PathVariable Long todoId,
@@ -121,7 +149,7 @@ public class TodoController {
         ));
     }
 
-    /** ✅ 세트별 휴식시간 초기화 */
+    /** 세트별 휴식시간 초기화 */
     @DeleteMapping("/rest/reset/{todoId}")
     public ResponseEntity<?> resetRestTime(@PathVariable Long todoId) {
         try {

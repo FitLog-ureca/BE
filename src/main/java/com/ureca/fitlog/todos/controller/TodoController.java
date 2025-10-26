@@ -18,7 +18,6 @@ import java.util.Map;
 public class TodoController {
 
     private final TodoService todoService;
-    private final TodoMapper todoMapper;
 
     /** 날짜별 투두 생성 */
     @PostMapping("/create")

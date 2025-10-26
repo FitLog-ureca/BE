@@ -18,7 +18,7 @@ public interface ExerciseMapper {
     /** 특정 날짜의 총 소모 칼로리 */
     double findTotalCaloriesByDate(@Param("date") LocalDate date);
 
-    List<ExerciseListResponseDTO> findExercises(
+    List<ExerciseListResponseDTO.ExerciseList> findExercises(
             @Param("keyword") String keyword,
             @Param("offset") int offset,
             @Param("limit") int limit

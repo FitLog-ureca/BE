@@ -47,19 +47,19 @@ public class ExerciseService {
                 .build();
     }
     /** 운동목록 list */
-    public Map<String, Object> getExercises(String keyword, int page, int size) {
+    public ExerciseListResponseDTO getExercises(String keyword, int page, int size) {
         int offset = page * size;
 
-        List<ExerciseListResponseDTO> exercises = exerciseMapper.findExercises(keyword, offset, size);
+        List<ExerciseListResponseDTO.ExerciseList> exercises =
+                exerciseMapper.findExercises(keyword, offset, size);
         int totalCount = exerciseMapper.countExercises(keyword);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("page", page);
-        result.put("size", size);
-        result.put("totalCount", totalCount);
-        result.put("totalPages", (int) Math.ceil((double) totalCount / size));
-        result.put("exercises", exercises);
-
-        return result;
+        return ExerciseListResponseDTO.builder()
+                .page(page)
+                .size(size)
+                .totalCount(totalCount)
+                .totalPages((int) Math.ceil((double) totalCount / size))
+                .exercises(exercises)
+                .build();
     }
 }

@@ -46,7 +46,7 @@ public class ExerciseController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Map<String, Object>> searchExercises(
+    public ResponseEntity<ExerciseListResponseDTO> searchExercises(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size

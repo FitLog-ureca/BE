@@ -14,21 +14,19 @@
 
     <!-- 투두 생성 -->
     <insert id="insertTodo"
-            parameterType="com.ureca.fitlog.todos.dto.TodoRequestDTO"
+            parameterType="com.ureca.fitlog.todos.dto.TodoCreateRequestDTO"
             useGeneratedKeys="true"
             keyProperty="todoId">
         INSERT INTO todos (
-            user_id, exercise_id, date, sets_number, reps_target, rest_time, is_completed, is_done
+            user_id, exercise_id, date, sets_number, reps_target, rest_time
         )
         VALUES (
-                   1,
+                   #{userId},
                    #{exerciseId},
                    #{date},
                    #{setsNumber},
                    #{repsTarget},
-                   #{restTime},
-                   IFNULL(#{isCompleted}, false),
-                   IFNULL(#{isDone}, false)
+                   #{restTime}
                );
     </insert>
 
@@ -45,19 +43,6 @@
     </update>
 
     <!-- 투두 수정 -->
-    <update id="updateTodo"
-            parameterType="com.ureca.fitlog.todos.dto.TodoRequestDTO">
-        UPDATE todos
-        SET
-            exercise_id = #{exerciseId},
-            sets_number = #{setsNumber},
-            reps_target = #{repsTarget},
-            rest_time = #{restTime},
-            is_completed = #{isCompleted},
-            updated_at = CURRENT_TIMESTAMP
-        WHERE todo_id = #{todoId};
-    </update>
-
     <update id="updateTodoRepsOnly" parameterType="map">
         UPDATE todos
         SET reps_target = #{repsTarget},

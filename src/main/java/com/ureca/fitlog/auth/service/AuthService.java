@@ -4,6 +4,8 @@ import com.ureca.fitlog.auth.dto.*;
 import com.ureca.fitlog.auth.mapper.AuthMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 
 @Service
@@ -13,6 +15,7 @@ public class AuthService {
     private final AuthMapper authMapper;
 
     /** 회원가입 */
+    @Transactional
     public SignupResponseDTO signup(SignupRequestDTO request) {
         if (!request.getPassword().equals(request.getPasswordCheck())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");

@@ -18,7 +18,25 @@
             t.rest_time AS restTime,
             t.is_completed AS isCompleted,
             e.default_calories_per_set AS caloriesPerRep,
-            (t.sets_number * t.reps_target * e.default_calories_per_set) AS totalCalories
+            (t.reps_target * e.default_calories_per_set) AS burnedCalories
+        FROM todos t
+                 JOIN exercises e ON t.exercise_id = e.exercise_id
+        WHERE t.date = #{date}
+        ORDER BY t.todo_id ASC
+    </select>
+
+    <!-- 계획(미완료) 운동 목록 -->
+    <select id="findPlannedExercisesByDate"
+            parameterType="java.time.LocalDate"
+            resultType="com.ureca.fitlog.exercise.dto.ExerciseResponseDTO$ExerciseItem">
+        SELECT
+            t.todo_id AS todoId,
+            t.exercise_id AS exerciseId,
+            e.name AS exerciseName,
+            t.sets_number AS setsNumber,
+            t.reps_target AS repsTarget,
+            t.rest_time AS restTime,
+            t.is_completed AS isCompleted
         FROM todos t
                  JOIN exercises e ON t.exercise_id = e.exercise_id
         WHERE t.date = #{date}
@@ -29,7 +47,7 @@
     <select id="findTotalCaloriesByDate"
             parameterType="java.time.LocalDate"
             resultType="double">
-        SELECT IFNULL(SUM(t.sets_number * t.reps_target * e.default_calories_per_set), 0)
+        SELECT IFNULL(SUM(t.reps_target * e.default_calories_per_set), 0)
         FROM todos t
                  JOIN exercises e ON t.exercise_id = e.exercise_id
         WHERE t.date = #{date}

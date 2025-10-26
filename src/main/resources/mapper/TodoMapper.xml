@@ -4,6 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.ureca.fitlog.todos.mapper.TodoMapper">
+    <!-- 특정 날짜 + 운동 종목의 현재 세트 개수 조회 -->
+    <select id="countSetsByDateAndExercise" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM todos
+        WHERE date = #{date}
+          AND exercise_id = #{exerciseId};
+    </select>
 
     <!-- 투두 생성 -->
     <insert id="insertTodo"
@@ -25,24 +32,23 @@
                );
     </insert>
 
-    <!-- 완료 체크 -->
+    <!-- 투두 완료 체크 -->
     <select id="getIsCompletedById" resultType="boolean">
         SELECT is_completed FROM todos WHERE todo_id = #{todoId}
     </select>
 
     <update id="updateTodoCompletion">
         UPDATE todos
-        SET is_completed = #{isCompleted},
+        SET is_completed = IFNULL(#{isCompleted}, FALSE),
             updated_at = CURRENT_TIMESTAMP
         WHERE todo_id = #{todoId};
     </update>
 
-    <!-- 수정 -->
+    <!-- 투두 수정 -->
     <update id="updateTodo"
             parameterType="com.ureca.fitlog.todos.dto.TodoRequestDTO">
         UPDATE todos
         SET
-            date = #{date},
             exercise_id = #{exerciseId},
             sets_number = #{setsNumber},
             reps_target = #{repsTarget},
@@ -52,17 +58,66 @@
         WHERE todo_id = #{todoId};
     </update>
 
-    <!-- 삭제 -->
-    <delete id="deleteTodoById">
-        DELETE FROM todos WHERE todo_id = #{todoId};
+    <update id="updateTodoRepsOnly" parameterType="map">
+        UPDATE todos
+        SET reps_target = #{repsTarget},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE todo_id = #{todoId};
+    </update>
+
+    <!-- 세트번호 임시 음수화 (UNIQUE 제약 피하기 위함) -->
+    <update id="tempNegateSetsNumbers" parameterType="map">
+        UPDATE todos
+        SET sets_number = -(sets_number)
+        WHERE date = #{date}
+          AND exercise_id = #{exerciseId};
+    </update>
+
+    <!-- 세트번호 재정렬 -->
+    <update id="reorderSetsNumbers" parameterType="map">
+        UPDATE todos t
+            JOIN (
+            SELECT
+            todo_id,
+            ROW_NUMBER() OVER (ORDER BY todo_id ASC) AS new_number
+            FROM todos
+            WHERE date = #{date}
+            AND exercise_id = #{exerciseId}
+            ) ranked
+        ON t.todo_id = ranked.todo_id
+            SET t.sets_number = ranked.new_number
+        WHERE t.date = #{date}
+          AND t.exercise_id = #{exerciseId};
+    </update>
+
+    <!-- 특정 todo_id 삭제 -->
+    <delete id="deleteTodoById" parameterType="long">
+        DELETE FROM todos
+        WHERE todo_id = #{todoId};
     </delete>
+
+    <!-- 삭제된 todo의 date, exercise_id 조회 -->
+    <select id="findDateAndExerciseIdByTodoId" parameterType="long" resultType="map">
+        SELECT date, exercise_id
+        FROM todos
+        WHERE todo_id = #{todoId};
+    </select>
 
     <!-- 하루 완료 버튼(is_done) 업데이트 -->
     <update id="updateTodosDoneStatus">
         UPDATE todos
-        SET is_done = #{isDone}
+        SET is_done = IFNULL(#{isDone}, FALSE)
         WHERE date = #{date};
     </update>
+
+    <select id="existsTodosDoneTrueByDate"
+            parameterType="java.time.LocalDate"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM todos
+        WHERE date = #{date}
+          AND is_done = TRUE
+    </select>
 
     <!-- 참고용 통계 -->
     <select id="countTodosByDate" parameterType="java.time.LocalDate" resultType="int">
@@ -75,6 +130,7 @@
           AND (is_completed IS NULL OR is_completed = FALSE)
     </select>
 
+    <!-- 휴식 시간 기록 및 초기화 -->
     <update id="updateRestTime" parameterType="map">
         UPDATE todos
         SET rest_time = #{restTime},

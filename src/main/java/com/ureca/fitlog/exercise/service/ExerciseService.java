@@ -3,6 +3,7 @@ package com.ureca.fitlog.exercise.service;
 import com.ureca.fitlog.exercise.dto.ExerciseListResponseDTO;
 import com.ureca.fitlog.exercise.dto.ExerciseResponseDTO;
 import com.ureca.fitlog.exercise.mapper.ExerciseMapper;
+import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,20 +17,34 @@ import java.util.Map;
 public class ExerciseService {
 
     private final ExerciseMapper exerciseMapper;
+    private final TodoMapper todoMapper; // isDone 판단용
 
-    /** 기록(완료) 뷰: 완료 항목 + 총 칼로리 */
-    public ExerciseResponseDTO getCompletedRecords(LocalDate date) {
-        List<ExerciseResponseDTO.ExerciseItem> records = exerciseMapper.findCompletedExercisesByDate(date);
-        double totalCalories = exerciseMapper.findTotalCaloriesByDate(date);
+    public ExerciseResponseDTO getExercisesByDate(LocalDate date) {
 
-        ExerciseResponseDTO dto = new ExerciseResponseDTO();
-        dto.setDate(date);
-        dto.setExercises(records);
-        dto.setTotalCalories(totalCalories);
-        dto.setMessage(records.isEmpty()
-                ? "해당 날짜에 완료된 운동 기록이 없습니다."
-                : "운동 기록이 성공적으로 조회되었습니다.");
-        return dto;
+        // 오늘 운동 완료 여부 확인
+        boolean isDone = todoMapper.existsTodosDoneTrueByDate(date) > 0;
+
+        // 운동 목록 조회
+        List<ExerciseResponseDTO.ExerciseItem> exercises;
+        double totalCalories = 0.0;
+
+        if (isDone) {
+            exercises = exerciseMapper.findCompletedExercisesByDate(date);
+            totalCalories = exerciseMapper.findTotalCaloriesByDate(date);
+        } else {
+            exercises = exerciseMapper.findPlannedExercisesByDate(date);
+        }
+
+        // 답 DTO 조합 (builder 부분)
+        return ExerciseResponseDTO.builder()
+                .date(date)
+                .isDone(isDone)
+                .exercises(exercises)
+                .totalCalories(totalCalories)
+                .message(isDone
+                        ? "운동 기록이 성공적으로 조회되었습니다."
+                        : "오늘의 운동 계획이 조회되었습니다.")
+                .build();
     }
     /** 운동목록 list */
     public Map<String, Object> getExercises(String keyword, int page, int size) {

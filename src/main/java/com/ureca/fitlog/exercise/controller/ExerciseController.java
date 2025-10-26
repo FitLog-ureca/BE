@@ -21,9 +21,8 @@ public class ExerciseController {
 
     /**
      * 특정 날짜의 운동 계획 or 기록 조회
-     *
-     * - isDone == false → 오늘의 운동 계획 목록 (칼로리 X)
-     * - isDone == true  → 완료된 운동 기록 + 총 칼로리 표시
+     * - isDone == false → 운동 계획 목록 (칼로리 관련 정보 X)
+     * - isDone == true  → 완료된 운동 기록 + 총 소모 칼로리 표시
      */
     @Operation(
             summary = "운동 기록 조회",

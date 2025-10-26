@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.ureca.fitlog.todos.mapper.TodoMapper">
-    <!-- ✅ 특정 날짜+운동 종목의 현재 세트 개수 조회 -->
+    <!-- 특정 날짜 + 운동 종목의 현재 세트 개수 조회 -->
     <select id="countSetsByDateAndExercise" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM todos
@@ -39,7 +39,7 @@
 
     <update id="updateTodoCompletion">
         UPDATE todos
-        SET is_completed = #{isCompleted},
+        SET is_completed = IFNULL(#{isCompleted}, FALSE),
             updated_at = CURRENT_TIMESTAMP
         WHERE todo_id = #{todoId};
     </update>
@@ -65,7 +65,7 @@
         WHERE todo_id = #{todoId};
     </update>
 
-    <!-- ✅ 세트번호 임시 음수화 (UNIQUE 제약 피하기 위함) -->
+    <!-- 세트번호 임시 음수화 (UNIQUE 제약 피하기 위함) -->
     <update id="tempNegateSetsNumbers" parameterType="map">
         UPDATE todos
         SET sets_number = -(sets_number)
@@ -73,7 +73,7 @@
           AND exercise_id = #{exerciseId};
     </update>
 
-    <!-- ✅ 세트번호 재정렬 -->
+    <!-- 세트번호 재정렬 -->
     <update id="reorderSetsNumbers" parameterType="map">
         UPDATE todos t
             JOIN (
@@ -90,13 +90,13 @@
           AND t.exercise_id = #{exerciseId};
     </update>
 
-    <!-- ✅ 특정 todo_id 삭제 -->
+    <!-- 특정 todo_id 삭제 -->
     <delete id="deleteTodoById" parameterType="long">
         DELETE FROM todos
         WHERE todo_id = #{todoId};
     </delete>
 
-    <!-- ✅ 삭제된 todo의 date, exercise_id 조회 -->
+    <!-- 삭제된 todo의 date, exercise_id 조회 -->
     <select id="findDateAndExerciseIdByTodoId" parameterType="long" resultType="map">
         SELECT date, exercise_id
         FROM todos
@@ -106,7 +106,7 @@
     <!-- 하루 완료 버튼(is_done) 업데이트 -->
     <update id="updateTodosDoneStatus">
         UPDATE todos
-        SET is_done = #{isDone}
+        SET is_done = IFNULL(#{isDone}, FALSE)
         WHERE date = #{date};
     </update>
 

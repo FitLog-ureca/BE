@@ -18,10 +18,10 @@ public class ExerciseService {
 
     public ExerciseResponseDTO getExercisesByDate(LocalDate date) {
 
-        // 1️⃣ 오늘 운동 완료 여부 확인
+        // 오늘 운동 완료 여부 확인
         boolean isDone = todoMapper.existsTodosDoneTrueByDate(date) > 0;
 
-        // 2️⃣ 운동 목록 조회
+        // 운동 목록 조회
         List<ExerciseResponseDTO.ExerciseItem> exercises;
         double totalCalories = 0.0;
 
@@ -32,7 +32,7 @@ public class ExerciseService {
             exercises = exerciseMapper.findPlannedExercisesByDate(date);
         }
 
-        // 3️⃣ 응답 DTO 조합 (이게 바로 builder 부분)
+        // 답 DTO 조합 (builder 부분)
         return ExerciseResponseDTO.builder()
                 .date(date)
                 .isDone(isDone)

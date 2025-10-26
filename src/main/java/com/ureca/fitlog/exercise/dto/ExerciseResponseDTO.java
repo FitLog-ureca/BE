@@ -24,7 +24,6 @@ public class ExerciseResponseDTO {
         private Integer repsTarget;                   // 세트당 횟수/시간
         private Integer restTime;                     // 휴식(초)
         private Boolean isCompleted;                  // 세트 완료 여부
-//        private Boolean isDone;                       // 완료 버튼 여부
         private Double caloriesPerRep;                // 1회(혹은 1단위)당 칼로리
         private Double burnedCalories;                // 세트 당 소모 칼로리
     }

@@ -26,25 +26,7 @@ public class TodoController {
         return ResponseEntity.ok(todoService.createTodo(requestDto));
     }
 
-//    /** 운동 완료 버튼 (해당 날짜의 모든 todo_id의 is_done을 true로 전체 변경) */
-//    @PatchMapping("/done/{date}")
-//    public ResponseEntity<Map<String, Object>> updateTodosDoneStatus(
-//            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-//
-//        // 기본적으로 true로 처리
-//        boolean isDone = true;
-//
-//        int updated = todoMapper.updateTodosDoneStatus(date, isDone);
-//
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("date", date);
-//        response.put("isDone", isDone);
-//        response.put("updatedCount", updated);
-//        response.put("message", "해당 날짜의 운동이 완료 상태로 변경되었습니다.");
-//
-//        return ResponseEntity.ok(response);
-//    }
-    /** ✅ 운동 완료 상태 토글 (true ↔ false 자동 전환) */
+    /** 운동 완료 상태 토글 (true ↔ false 자동 전환) */
     @PatchMapping("/done/{date}")
     public ResponseEntity<Map<String, Object>> toggleTodosDoneStatus(
             @PathVariable LocalDate date
@@ -67,7 +49,7 @@ public class TodoController {
         return ResponseEntity.ok(todoService.updateTodoCompletion(todoId));
     }
 
-    /** 수정 */
+    /** 투두리스트 전체 수정 */
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateTodo(
             @PathVariable("id") Long todoId,
@@ -102,7 +84,7 @@ public class TodoController {
     ) {
         Integer restTime = body.get("restTime");
 
-        // 1️⃣ 유효성 검증
+        // 유효성 검증
         if (restTime == null) {
             return ResponseEntity.badRequest().body(Map.of(
                     "status", 400,
@@ -118,7 +100,7 @@ public class TodoController {
             ));
         }
 
-        // 2️⃣ 서비스 실행
+        // 서비스 실행
         try {
             todoService.updateRestTime(todoId, restTime);
         } catch (IllegalStateException e) {
@@ -141,7 +123,7 @@ public class TodoController {
             ));
         }
 
-        // 3️⃣ 성공 응답
+        // 성공 응답
         return ResponseEntity.ok(Map.of(
                 "todoId", todoId,
                 "restTime", restTime,

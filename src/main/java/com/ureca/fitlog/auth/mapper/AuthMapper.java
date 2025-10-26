@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface AuthMapper {
 
     void insertUser(@Param("name") String name,
-                    @Param("birth") String birth,
+                    @Param("birth") java.time.LocalDate birth,
                     @Param("loginId") String loginId,
                     @Param("password") String password);
 

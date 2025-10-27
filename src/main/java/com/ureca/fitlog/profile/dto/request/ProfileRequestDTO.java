@@ -1,4 +1,4 @@
-package com.ureca.fitlog.profile.dto;
+package com.ureca.fitlog.profile.dto.request;
 
 import lombok.Data;
 

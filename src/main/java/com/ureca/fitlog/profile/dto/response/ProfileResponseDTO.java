@@ -1,4 +1,4 @@
-package com.ureca.fitlog.profile.dto;
+package com.ureca.fitlog.profile.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

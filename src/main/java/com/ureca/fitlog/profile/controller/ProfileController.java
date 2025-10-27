@@ -1,7 +1,7 @@
 package com.ureca.fitlog.profile.controller;
 
-import com.ureca.fitlog.profile.dto.ProfileRequestDTO;
-import com.ureca.fitlog.profile.dto.ProfileResponseDTO;
+import com.ureca.fitlog.profile.dto.request.ProfileRequestDTO;
+import com.ureca.fitlog.profile.dto.response.ProfileResponseDTO;
 import com.ureca.fitlog.profile.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,7 +1,7 @@
 package com.ureca.fitlog.exercise.controller;
 
-import com.ureca.fitlog.exercise.dto.ExerciseListResponseDTO;
-import com.ureca.fitlog.exercise.dto.ExerciseResponseDTO;
+import com.ureca.fitlog.exercise.dto.response.ExerciseListResponseDTO;
+import com.ureca.fitlog.exercise.dto.response.ExerciseResponseDTO;
 import com.ureca.fitlog.exercise.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,13 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/exercises")
-@Tag(name = "Exercise API", description = "운동 기록 조회 관련 API")
+@Tag(name = "Exercise API", description = "운동 조회 관련 API")
 public class ExerciseController {
 
     private final ExerciseService exerciseService;
@@ -45,6 +43,9 @@ public class ExerciseController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "운동 목록 조회"
+    )
     @GetMapping("/search")
     public ResponseEntity<ExerciseListResponseDTO> searchExercises(
             @RequestParam(required = false) String keyword,

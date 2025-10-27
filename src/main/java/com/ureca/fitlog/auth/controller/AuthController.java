@@ -1,8 +1,14 @@
 package com.ureca.fitlog.auth.controller;
 
-import com.ureca.fitlog.auth.dto.*;
+import com.ureca.fitlog.auth.dto.request.LoginRequestDTO;
+import com.ureca.fitlog.auth.dto.request.SignupRequestDTO;
+import com.ureca.fitlog.auth.dto.response.LoginResponseDTO;
+import com.ureca.fitlog.auth.dto.response.LogoutResponseDTO;
+import com.ureca.fitlog.auth.dto.response.SignupResponseDTO;
 import com.ureca.fitlog.auth.jwt.JwtTokenProvider;
 import com.ureca.fitlog.auth.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth API", description = "회원가입 및 로그인 관련 API")
 public class AuthController {
 
     private final AuthService authService;
@@ -20,6 +27,9 @@ public class AuthController {
 
     /** 회원가입 */
     @PostMapping("/signup")
+    @Operation(
+            summary = "회원가입"
+    )
     public ResponseEntity<SignupResponseDTO> signup(@RequestBody SignupRequestDTO request) {
         SignupResponseDTO response = authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -27,6 +37,9 @@ public class AuthController {
 
     /** 로그인 (JWT 발급 포함) */
     @PostMapping("/login")
+    @Operation(
+            summary = "로그인"
+    )
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
         try {
             LoginResponseDTO loginResult = authService.login(request);
@@ -63,6 +76,9 @@ public class AuthController {
     }
     /** 로그아웃 (쿠키 삭제) */
     @PostMapping("/logout")
+    @Operation(
+            summary = "로그아웃"
+    )
     public ResponseEntity<LogoutResponseDTO> logout(HttpServletResponse response) {
         Cookie cookie = new Cookie("accessToken", null);
         cookie.setHttpOnly(true);

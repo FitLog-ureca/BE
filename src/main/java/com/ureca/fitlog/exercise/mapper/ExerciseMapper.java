@@ -1,7 +1,7 @@
 package com.ureca.fitlog.exercise.mapper;
 
-import com.ureca.fitlog.exercise.dto.ExerciseListResponseDTO;
-import com.ureca.fitlog.exercise.dto.ExerciseResponseDTO;
+import com.ureca.fitlog.exercise.dto.response.ExerciseListResponseDTO;
+import com.ureca.fitlog.exercise.dto.response.ExerciseResponseDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

@@ -1,17 +1,15 @@
 package com.ureca.fitlog.exercise.service;
 
 import com.ureca.fitlog.auth.mapper.AuthMapper;
-import com.ureca.fitlog.exercise.dto.ExerciseListResponseDTO;
-import com.ureca.fitlog.exercise.dto.ExerciseResponseDTO;
+import com.ureca.fitlog.exercise.dto.response.ExerciseListResponseDTO;
+import com.ureca.fitlog.exercise.dto.response.ExerciseResponseDTO;
 import com.ureca.fitlog.exercise.mapper.ExerciseMapper;
 import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

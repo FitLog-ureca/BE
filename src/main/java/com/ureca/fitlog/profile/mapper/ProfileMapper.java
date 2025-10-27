@@ -1,10 +1,9 @@
 package com.ureca.fitlog.profile.mapper;
 
-import com.ureca.fitlog.profile.dto.ProfileRequestDTO;
-import com.ureca.fitlog.profile.dto.ProfileResponseDTO;
+import com.ureca.fitlog.profile.dto.request.ProfileRequestDTO;
+import com.ureca.fitlog.profile.dto.response.ProfileResponseDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface ProfileMapper {

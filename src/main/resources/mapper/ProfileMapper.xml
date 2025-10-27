@@ -8,7 +8,7 @@
     <!-- 프로필 조회 -->
     <select id="findProfileByLoginId"
             parameterType="string"
-            resultType="com.ureca.fitlog.profile.dto.ProfileResponseDTO">
+            resultType="com.ureca.fitlog.profile.dto.response.ProfileResponseDTO">
         SELECT
             username AS name,
             bio,

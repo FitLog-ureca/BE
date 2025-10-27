@@ -1,7 +1,7 @@
 package com.ureca.fitlog.profile.service;
 
-import com.ureca.fitlog.profile.dto.ProfileRequestDTO;
-import com.ureca.fitlog.profile.dto.ProfileResponseDTO;
+import com.ureca.fitlog.profile.dto.request.ProfileRequestDTO;
+import com.ureca.fitlog.profile.dto.response.ProfileResponseDTO;
 import com.ureca.fitlog.profile.mapper.ProfileMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

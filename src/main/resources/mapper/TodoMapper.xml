@@ -9,7 +9,8 @@
         SELECT COUNT(*)
         FROM todos
         WHERE date = #{date}
-          AND exercise_id = #{exerciseId};
+          AND exercise_id = #{exerciseId}
+          AND user_id = #{userId}
     </select>
 
     <!-- 투두 생성 -->

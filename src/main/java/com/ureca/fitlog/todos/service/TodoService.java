@@ -23,16 +23,25 @@ public class TodoService {
     /** Todo 생성 (세트번호 자동 증가) */
     @Transactional
     public TodoCreateResponseDTO createTodo(TodoCreateRequestDTO dto) {
-        String loginId = SecurityUtil.getLoginId();
+        // 로그인한 사용자 ID 가져오기
+        String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
+        if (loginId == null) {
+            throw new IllegalStateException("로그인 정보가 없습니다.");
+        }
+
         var user = authMapper.findById(loginId);
         if (user == null) {
             throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
         }
 
-        dto.setUserId(user.getUserId());
+        Long userId = user.getUserId();
+        dto.setUserId(userId);
 
-        int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId());
-        dto.setSetsNumber(currentCount + 1);
+        int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId(), userId);
+
+        int nextSetNumber = currentCount + 1;
+        dto.setSetsNumber(nextSetNumber);
+
         todoMapper.insertTodo(dto);
 
         return TodoCreateResponseDTO.builder()
@@ -45,6 +54,7 @@ public class TodoService {
                 .message("투두가 성공적으로 생성되었습니다.")
                 .build();
     }
+
 
     /** 개별 세트 완료 토글 (todoId만으로 true/false 자동 반전) */
     public TodoCompleteResponseDTO updateTodoCompletion(Long todoId) {

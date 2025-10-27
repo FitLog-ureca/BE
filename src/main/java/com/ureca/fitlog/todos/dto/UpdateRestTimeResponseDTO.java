@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class UpdateRestResponseDTO {
+public class UpdateRestTimeResponseDTO {
     private Long todoId;
     private Integer restTime;
     private String message;

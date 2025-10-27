@@ -94,7 +94,7 @@ public class TodoController {
     }
     /** 세트별 휴식시간 기록 (초 단위) */
     @PatchMapping("/rest/{todoId}")
-    public ResponseEntity<UpdateRestResponseDTO> updateRestTime(
+    public ResponseEntity<UpdateRestTimeResponseDTO> updateRestTime(
             @PathVariable Long todoId,
             @RequestBody UpdateRestTimeRequestDTO request
     ) {
@@ -108,7 +108,7 @@ public class TodoController {
         // 서비스 호출
         Map<String, Object> result = todoService.updateRestTime(todoId, restTime);
 
-        UpdateRestResponseDTO response = UpdateRestResponseDTO.builder()
+        UpdateRestTimeResponseDTO response = UpdateRestTimeResponseDTO.builder()
                 .todoId((Long) result.get("todoId"))
                 .restTime((Integer) result.get("restTime"))
                 .message((String) result.get("message"))

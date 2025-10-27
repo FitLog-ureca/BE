@@ -29,7 +29,8 @@ public interface TodoMapper {
 
     /** [READ] 특정 날짜와 운동 종목에 대한 투두리스트(세트) 개수 조회 */
     int countSetsByDateAndExercise(@Param("date") LocalDate date,
-                                   @Param("exerciseId") Long exerciseId);
+                                   @Param("exerciseId") Long exerciseId,
+                                   @Param("userId") Long userId);
 
     /** 운동 완료 상태 토글 */
     void updateTodosDoneStatus(@Param("date") LocalDate date, @Param("isDone") boolean isDone);

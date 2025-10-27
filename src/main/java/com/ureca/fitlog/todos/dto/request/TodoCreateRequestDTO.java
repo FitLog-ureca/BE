@@ -17,7 +17,9 @@ public class TodoCreateRequestDTO {
     private Long userId;
     private LocalDate date;       // 운동 날짜
     private Long exerciseId;      // 운동 종목 ID
+    @Schema(hidden = true)
     private Integer setsNumber;   // 세트 수
     private Integer repsTarget;   // 세트당 목표 횟수
+    @Schema(hidden = true)
     private Integer restTime;     // 총 휴식시간 (초 단위)
 }

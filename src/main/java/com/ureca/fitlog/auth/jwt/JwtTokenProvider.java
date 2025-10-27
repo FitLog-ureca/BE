@@ -2,6 +2,7 @@ package com.ureca.fitlog.auth.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final Key key;
+    @Getter
     private final long validityInMilliseconds;
 
     public JwtTokenProvider(
@@ -80,8 +82,6 @@ public class JwtTokenProvider {
     /** 토큰 기반 Authentication 객체 생성 */
     public Authentication getAuthentication(String token) {
         String username = getUsername(token);
-        // 권한 정보가 있다면 여기에 roles 파싱 추가 가능
-//        return new UsernamePasswordAuthenticationToken(username, "", Collections.singletonList(new SimpleGrantedAuthority("USER")));
         return new UsernamePasswordAuthenticationToken(
                 username,
                 "",

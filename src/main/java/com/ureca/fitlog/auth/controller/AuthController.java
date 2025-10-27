@@ -41,11 +41,11 @@ public class AuthController {
             summary = "로그인"
     )
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
-        try {
             LoginResponseDTO loginResult = authService.login(request);
             // JWT 토큰 생성
             String token = jwtTokenProvider.createToken(loginResult.getLoginId());
             int cookieMaxAge = (int) (jwtTokenProvider.getValidityInMilliseconds());
+
             Cookie cookie = new Cookie("accessToken", token);
             cookie.setHttpOnly(true);  // JS 접근 불가
             cookie.setSecure(true);    // HTTPS 전용
@@ -63,17 +63,6 @@ public class AuthController {
                     .build();
 
             return ResponseEntity.ok(responseBody);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(LoginResponseDTO.builder()
-                            .message("아이디 또는 비밀번호가 올바르지 않습니다.")
-                            .build());
-        }  catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(LoginResponseDTO.builder()
-                            .message("로그인 처리 중 오류가 발생했습니다.")
-                            .build());
-        }
     }
     /** 로그아웃 (쿠키 삭제) */
     @PostMapping("/logout")

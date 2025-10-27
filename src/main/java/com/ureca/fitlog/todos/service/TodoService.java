@@ -1,5 +1,7 @@
 package com.ureca.fitlog.todos.service;
 
+import com.ureca.fitlog.common.exception.BusinessException;
+import com.ureca.fitlog.common.exception.ExceptionStatus;
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCompleteResponseDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCreateResponseDTO;
@@ -26,12 +28,12 @@ public class TodoService {
     private Long getCurrentUserId() {
         String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
         if (loginId == null) {
-            throw new IllegalStateException("로그인 정보가 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_AUTH_LOGIN_INFO_NOT_FOUND);
         }
 
         var user = authMapper.findById(loginId);
         if (user == null) {
-            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_AUTH_USER_NOT_FOUND);
         }
 
         return user.getUserId();
@@ -66,14 +68,14 @@ public class TodoService {
 
         Boolean currentStatus = todoMapper.getIsCompletedById(todoId, userId);
         if (currentStatus == null) {
-            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
 
         Boolean newStatus = !currentStatus;
         int updated = todoMapper.updateTodoCompletion(todoId, userId, newStatus);
 
         if (updated == 0) {
-            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
 
         return TodoCompleteResponseDTO.builder()
@@ -102,9 +104,15 @@ public class TodoService {
     @Transactional
     public void updateTodoRepsOnly(Long todoId, int repsTarget) {
         Long userId = getCurrentUserId();
+
+        // 유효성 검증
+        if (repsTarget <= 0) {
+            throw new BusinessException(ExceptionStatus.TODO_VALIDATION_REPS_TARGET_INVALID);
+        }
+
         int updated = todoMapper.updateTodoRepsOnly(todoId, userId, repsTarget);
         if (updated == 0) {
-            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
     }
 
@@ -117,7 +125,7 @@ public class TodoService {
             response.put("todoId", todoId);
             response.put("message", "TodoList가 성공적으로 삭제되었습니다.");
         } else {
-            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
         return response;
     }
@@ -126,10 +134,11 @@ public class TodoService {
     @Transactional
     public void deleteTodoAndReorder(Long todoId) {
         Long userId = getCurrentUserId();
+
         // 삭제 대상의 date, exercise_id 조회 (본인 소유 확인)
         Map<String, Object> info = todoMapper.findDateAndExerciseIdByTodoId(todoId, userId);
         if (info == null || info.isEmpty()) {
-            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
 
         Object dateObj = info.get("date");
@@ -151,11 +160,16 @@ public class TodoService {
     public Map<String, Object> updateRestTime(Long todoId, Integer restTime) {
         Long userId = getCurrentUserId();
 
+        // 유효성 검증
+        if (restTime == null || restTime < 0 || restTime > 7200) {
+            throw new BusinessException(ExceptionStatus.TODO_VALIDATION_REST_TIME_INVALID);
+        }
+
         // 해당 todo가 본인 소유인지 검증하면서 업데이트
         int updated = todoMapper.updateRestTime(todoId, userId, restTime);
 
         if (updated == 0) {
-            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
 
         // 성공 응답
@@ -174,7 +188,7 @@ public class TodoService {
         // 해당 todo가 본인 소유인지 확인하며 초기화
         int updated = todoMapper.resetRestTime(todoId, userId);
         if (updated == 0) {
-            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
     }
 }

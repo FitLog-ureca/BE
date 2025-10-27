@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/exercises")
-@Tag(name = "Exercise API", description = "운동 기록 조회 관련 API")
+@Tag(name = "Exercise API", description = "운동 조회 관련 API")
 public class ExerciseController {
 
     private final ExerciseService exerciseService;
@@ -45,6 +45,9 @@ public class ExerciseController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "운동 목록 조회"
+    )
     @GetMapping("/search")
     public ResponseEntity<ExerciseListResponseDTO> searchExercises(
             @RequestParam(required = false) String keyword,

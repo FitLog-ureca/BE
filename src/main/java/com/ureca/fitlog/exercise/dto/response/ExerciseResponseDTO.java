@@ -1,4 +1,4 @@
-package com.ureca.fitlog.exercise.dto;
+package com.ureca.fitlog.exercise.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

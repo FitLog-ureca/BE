@@ -1,7 +1,7 @@
 package com.ureca.fitlog.exercise.controller;
 
-import com.ureca.fitlog.exercise.dto.ExerciseListResponseDTO;
-import com.ureca.fitlog.exercise.dto.ExerciseResponseDTO;
+import com.ureca.fitlog.exercise.dto.response.ExerciseListResponseDTO;
+import com.ureca.fitlog.exercise.dto.response.ExerciseResponseDTO;
 import com.ureca.fitlog.exercise.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor

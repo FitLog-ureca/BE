@@ -12,13 +12,16 @@ import java.util.List;
 public interface ExerciseMapper {
 
     /** 특정 날짜의 '완료된' 운동 항목 목록 (칼로리 포함) */
-    List<ExerciseResponseDTO.ExerciseItem> findCompletedExercisesByDate(@Param("date") LocalDate date);
-    List<ExerciseResponseDTO.ExerciseItem> findPlannedExercisesByDate(@Param("date") LocalDate date);
+    List<ExerciseResponseDTO.ExerciseItem> findCompletedExercisesByDate(
+            @Param("date") LocalDate date, @Param("userId") Long userId);
+    List<ExerciseResponseDTO.ExerciseItem> findPlannedExercisesByDate(
+            @Param("date") LocalDate date, @Param("userId") Long userId);
 
     /** 특정 날짜의 총 소모 칼로리 */
-    double findTotalCaloriesByDate(@Param("date") LocalDate date);
+    double findTotalCaloriesByDate(
+            @Param("date") LocalDate date, @Param("userId") Long userId);
 
-    List<ExerciseListResponseDTO> findExercises(
+    List<ExerciseListResponseDTO.ExerciseList> findExercises(
             @Param("keyword") String keyword,
             @Param("offset") int offset,
             @Param("limit") int limit

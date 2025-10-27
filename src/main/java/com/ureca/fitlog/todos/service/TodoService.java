@@ -1,12 +1,12 @@
 package com.ureca.fitlog.todos.service;
 
-import com.ureca.fitlog.todos.dto.TodoCreateResponseDTO;
-import com.ureca.fitlog.todos.dto.TodoRequestDTO;
-import com.ureca.fitlog.todos.dto.TodoResponseDTO;
+import com.ureca.fitlog.common.SecurityUtil;
+import com.ureca.fitlog.todos.dto.*;
 import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -22,52 +22,56 @@ public class TodoService {
 
     /** Todo 생성 (세트번호 자동 증가) */
     @Transactional
-    public TodoCreateResponseDTO createTodo(TodoRequestDTO dto) {
-        // 해당 날짜+운동 종목의 현재 세트 수 조회
-        int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId());
+    public TodoCreateResponseDTO createTodo(TodoCreateRequestDTO dto) {
+        // 로그인한 사용자 ID 가져오기
+        String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
+        if (loginId == null) {
+            throw new IllegalStateException("로그인 정보가 없습니다.");
+        }
 
-        // 다음 세트 번호 계산
+        var user = authMapper.findById(loginId);
+        if (user == null) {
+            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
+        }
+
+        Long userId = user.getUserId();
+        dto.setUserId(userId);
+
+        int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId(), userId);
+
         int nextSetNumber = currentCount + 1;
         dto.setSetsNumber(nextSetNumber);
 
-        // DB에 삽입
         todoMapper.insertTodo(dto);
 
-        // 응답 DTO 반환
         return TodoCreateResponseDTO.builder()
                 .todoId(dto.getTodoId())
                 .exerciseId(dto.getExerciseId())
                 .setsNumber(dto.getSetsNumber())
                 .repsTarget(dto.getRepsTarget())
                 .date(dto.getDate())
-                .isCompleted(dto.isCompleted())
+                .isCompleted(false)
                 .message("투두가 성공적으로 생성되었습니다.")
                 .build();
     }
 
-    /** 개별 세트 완료 토글 (todoId만으로 true/false 자동 반전) */
-    public Map<String, Object> updateTodoCompletion(Long todoId) {
-        // 현재 상태 조회
-        Boolean currentStatus = todoMapper.getIsCompletedById(todoId);
 
-        // null 방지 + 토글 처리
+    /** 개별 세트 완료 토글 (todoId만으로 true/false 자동 반전) */
+    public TodoCompleteResponseDTO updateTodoCompletion(Long todoId) {
+        Boolean currentStatus = todoMapper.getIsCompletedById(todoId);
         Boolean newStatus = (currentStatus != null && currentStatus) ? false : true;
 
         int updated = todoMapper.updateTodoCompletion(todoId, newStatus);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("todoId", todoId);
-        response.put("isCompleted", newStatus);
+        String message = (updated > 0)
+                ? (newStatus ? "세트가 완료 처리되었습니다." : "세트 완료가 해제되었습니다.")
+                : "해당 투두 항목을 찾을 수 없습니다.";
 
-        if (updated > 0) {
-            response.put("message", newStatus
-                    ? "세트가 완료 처리되었습니다."
-                    : "세트 완료가 해제되었습니다.");
-        } else {
-            response.put("message", "해당 투두 항목을 찾을 수 없습니다.");
-        }
-
-        return response;
+        return TodoCompleteResponseDTO.builder()
+                .todoId(todoId)
+                .isCompleted(newStatus)
+                .message(message)
+                .build();
     }
 
     /** 현재 is_done 상태를 반전시켜 저장 */
@@ -84,18 +88,18 @@ public class TodoService {
     }
 
     /** 투두 수정 */
-    public Map<String, Object> updateTodo(TodoRequestDTO dto) {
-        int updated = todoMapper.updateTodo(dto);
-
-        Map<String, Object> response = new HashMap<>();
-        if (updated > 0) {
-            response.put("todoId", dto.getTodoId());
-            response.put("message", "Todo가 성공적으로 수정되었습니다.");
-        } else {
-            response.put("message", "해당 Todo가 존재하지 않습니다.");
-        }
-        return response;
-    }
+//    public TodoCreateResponseDTO updateTodo(TodoRequestDTO dto) {
+//        int updated = todoMapper.updateTodo(dto);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        if (updated > 0) {
+//            response.put("todoId", dto.getTodoId());
+//            response.put("message", "Todo가 성공적으로 수정되었습니다.");
+//        } else {
+//            response.put("message", "해당 Todo가 존재하지 않습니다.");
+//        }
+//        return response;
+//    }
 
     /** 세트당 수행횟수(reps_target)만 수정 */
     @Transactional

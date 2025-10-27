@@ -15,6 +15,6 @@ public interface AuthMapper {
                     @Param("password") String password);
 
     Long findLastInsertId();
-
+    Long findUserIdByLoginId(@Param("loginId") String loginId);
     UserInfo findById(@Param("loginId") String loginId);
 }

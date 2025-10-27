@@ -1,18 +1,16 @@
 package com.ureca.fitlog.todos.mapper;
 
-import com.ureca.fitlog.todos.dto.TodoRequestDTO;
-import com.ureca.fitlog.todos.dto.TodoResponseDTO;
+import com.ureca.fitlog.todos.dto.TodoCreateRequestDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 @Mapper
 public interface TodoMapper {
     /** [CREATE] 새로운 투두리스트(운동 세트) 생성 */
-    void insertTodo(TodoRequestDTO dto);
+    void insertTodo(TodoCreateRequestDTO dto);
 
     /** [READ]
      * 개별 세트의 완료 여부 조회
@@ -26,12 +24,13 @@ public interface TodoMapper {
      * 투두 전체 수정
      * 세트당 횟수만 수정
      * */
-    int updateTodo(TodoRequestDTO dto);
+//    int updateTodo(TodoCreateRequestDTO dto);
     void updateTodoRepsOnly(Map<String, Object> params);
 
     /** [READ] 특정 날짜와 운동 종목에 대한 투두리스트(세트) 개수 조회 */
     int countSetsByDateAndExercise(@Param("date") LocalDate date,
-                                   @Param("exerciseId") Long exerciseId);
+                                   @Param("exerciseId") Long exerciseId,
+                                   @Param("userId") Long userId);
 
     /** 운동 완료 상태 토글 */
     void updateTodosDoneStatus(@Param("date") LocalDate date, @Param("isDone") boolean isDone);

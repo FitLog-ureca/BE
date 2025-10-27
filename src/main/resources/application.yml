@@ -13,6 +13,7 @@ springdoc:
     operations-sorter: method
     tags-sorter: alpha
     doc-expansion: none
+    with-credentials: true
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
 

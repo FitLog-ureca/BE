@@ -1,17 +1,26 @@
 package com.ureca.fitlog.exercise.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ExerciseListResponseDTO {
-    private Long exerciseId;              // 운동 ID
-    private String name;                  // 운동명
-    private Double defaultCaloriesPerSet; // 1회(또는 1분) 기준 칼로리
-//    private String unit;                  // 단위 (회 / 분)
+    private int page;               // 현재 페이지
+    private int size;               // 페이지당 데이터 수
+    private int totalCount;         // 전체 운동 개수
+    private int totalPages;         // 전체 페이지 수
+    private List<ExerciseListResponseDTO.ExerciseList> exercises;
+
+    @Getter
+    @Setter
+    public static class ExerciseList {
+        private Long exerciseId;
+        private String name;
+        private Double defaultCaloriesPerSet;
+        private String unit;                  // 단위 (회 / 분)
+    }
 }

@@ -10,7 +10,7 @@
         FROM todos
         WHERE date = #{date}
           AND exercise_id = #{exerciseId}
-          AND user_id = #{userId}
+          AND user_id = #{userId};
     </select>
 
     <!-- 투두 생성 -->
@@ -31,35 +31,42 @@
                );
     </insert>
 
-    <!-- 투두 완료 체크 -->
+    <!-- 투두 완료 체크 (userId 검증 포함) -->
     <select id="getIsCompletedById" resultType="boolean">
-        SELECT is_completed FROM todos WHERE todo_id = #{todoId}
+        SELECT is_completed
+        FROM todos
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId};
     </select>
 
+    <!-- 투두 완료 상태 업데이트 (userId 검증 포함) -->
     <update id="updateTodoCompletion">
         UPDATE todos
         SET is_completed = IFNULL(#{isCompleted}, FALSE),
             updated_at = CURRENT_TIMESTAMP
-        WHERE todo_id = #{todoId};
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId};
     </update>
 
-    <!-- 투두 수정 -->
+    <!-- 투두 reps_target만 수정 (userId 검증 포함) -->
     <update id="updateTodoRepsOnly" parameterType="map">
         UPDATE todos
         SET reps_target = #{repsTarget},
             updated_at = CURRENT_TIMESTAMP
-        WHERE todo_id = #{todoId};
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId};
     </update>
 
-    <!-- 세트번호 임시 음수화 (UNIQUE 제약 피하기 위함) -->
+    <!-- 세트번호 임시 음수화 (userId 필터링) -->
     <update id="tempNegateSetsNumbers" parameterType="map">
         UPDATE todos
         SET sets_number = -(sets_number)
         WHERE date = #{date}
-          AND exercise_id = #{exerciseId};
+          AND exercise_id = #{exerciseId}
+          AND user_id = #{userId};
     </update>
 
-    <!-- 세트번호 재정렬 -->
+    <!-- 세트번호 재정렬 (userId 필터링) -->
     <update id="reorderSetsNumbers" parameterType="map">
         UPDATE todos t
             JOIN (
@@ -69,51 +76,48 @@
             FROM todos
             WHERE date = #{date}
             AND exercise_id = #{exerciseId}
+            AND user_id = #{userId}
             ) ranked
         ON t.todo_id = ranked.todo_id
             SET t.sets_number = ranked.new_number
         WHERE t.date = #{date}
-          AND t.exercise_id = #{exerciseId};
+          AND t.exercise_id = #{exerciseId}
+          AND t.user_id = #{userId};
     </update>
 
-    <!-- 특정 todo_id 삭제 -->
-    <delete id="deleteTodoById" parameterType="long">
+    <!-- 특정 todo_id 삭제 (userId 검증 포함) -->
+    <delete id="deleteTodoById" parameterType="map">
         DELETE FROM todos
-        WHERE todo_id = #{todoId};
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId};
     </delete>
 
-    <!-- 삭제된 todo의 date, exercise_id 조회 -->
-    <select id="findDateAndExerciseIdByTodoId" parameterType="long" resultType="map">
+    <!-- 삭제된 todo의 date, exercise_id 조회 (userId 검증 포함) -->
+    <select id="findDateAndExerciseIdByTodoId" parameterType="map" resultType="map">
         SELECT date, exercise_id
         FROM todos
-        WHERE todo_id = #{todoId};
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId};
     </select>
 
-    <!-- 하루 완료 버튼(is_done) 업데이트 -->
+    <!-- 하루 완료 버튼(is_done) 업데이트 (userId 필터링) -->
     <update id="updateTodosDoneStatus">
         UPDATE todos
-        SET is_done = IFNULL(#{isDone}, FALSE)
-        WHERE date = #{date};
+        SET is_done = IFNULL(#{isDone}, FALSE),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE date = #{date}
+          AND user_id = #{userId};
     </update>
 
+    <!-- 특정 날짜에 is_done = TRUE인 투두 존재 여부 확인 (userId 필터링) -->
     <select id="existsTodosDoneTrueByDate"
-            parameterType="java.time.LocalDate"
+            parameterType="map"
             resultType="int">
         SELECT COUNT(*)
         FROM todos
         WHERE date = #{date}
-          AND is_done = TRUE
-    </select>
-
-    <!-- 참고용 통계 -->
-    <select id="countTodosByDate" parameterType="java.time.LocalDate" resultType="int">
-        SELECT COUNT(*) FROM todos WHERE date = #{date}
-    </select>
-
-    <select id="countTodosByDateAndNotCompleted" parameterType="java.time.LocalDate" resultType="int">
-        SELECT COUNT(*) FROM todos
-        WHERE date = #{date}
-          AND (is_completed IS NULL OR is_completed = FALSE)
+          AND user_id = #{userId}
+          AND is_done = TRUE;
     </select>
 
     <!-- 휴식 시간 기록 및 초기화 -->
@@ -132,4 +136,20 @@
         WHERE todo_id = #{todoId}
           AND user_id = #{userId};
     </update>
+
+    <!-- 참고용 통계 (userId 필터링 추가) -->
+    <select id="countTodosByDate" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM todos
+        WHERE date = #{date}
+          AND user_id = #{userId};
+    </select>
+
+    <select id="countTodosByDateAndNotCompleted" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM todos
+        WHERE date = #{date}
+          AND user_id = #{userId}
+          AND (is_completed IS NULL OR is_completed = FALSE);
+    </select>
 </mapper>

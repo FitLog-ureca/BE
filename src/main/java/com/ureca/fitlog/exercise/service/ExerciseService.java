@@ -19,8 +19,10 @@ public class ExerciseService {
     private final TodoMapper todoMapper; // isDone 판단용
     private final AuthMapper authMapper;
 
-    public ExerciseResponseDTO getExercisesByDate(LocalDate date) {
-
+    /**
+     * 현재 로그인한 사용자의 userId를 가져오는 공통 메서드
+     */
+    private Long getCurrentUserId() {
         String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
         if (loginId == null) {
             throw new IllegalStateException("로그인 정보가 없습니다.");
@@ -31,9 +33,13 @@ public class ExerciseService {
             throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
         }
 
-        // 오늘 운동 완료 여부 확인
-        boolean isDone = todoMapper.existsTodosDoneTrueByDate(date) > 0;
+        return userId;
+    }
 
+    public ExerciseResponseDTO getExercisesByDate(LocalDate date) {
+        Long userId = getCurrentUserId();
+        // 오늘 운동 완료 여부 확인 (userId 포함)
+        boolean isDone = todoMapper.existsTodosDoneTrueByDate(date, userId) > 0;
         // 운동 목록 조회
         List<ExerciseResponseDTO.ExerciseItem> exercises;
         double totalCalories = 0.0;
@@ -56,6 +62,7 @@ public class ExerciseService {
                         : "오늘의 운동 계획이 조회되었습니다.")
                 .build();
     }
+
     /** 운동목록 list */
     public ExerciseListResponseDTO getExercises(String keyword, int page, int size) {
         int offset = page * size;

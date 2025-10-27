@@ -45,11 +45,12 @@ public class AuthController {
             LoginResponseDTO loginResult = authService.login(request);
             // JWT 토큰 생성
             String token = jwtTokenProvider.createToken(loginResult.getLoginId());
+            int cookieMaxAge = (int) (jwtTokenProvider.getValidityInMilliseconds());
             Cookie cookie = new Cookie("accessToken", token);
             cookie.setHttpOnly(true);  // JS 접근 불가
             cookie.setSecure(true);    // HTTPS 전용
             cookie.setPath("/");       // 모든 경로에 유효
-            cookie.setMaxAge(60 * 60); // 1시간 (AccessToken 유효기간과 동일)
+            cookie.setMaxAge(cookieMaxAge); // 1시간 (AccessToken 유효기간과 동일)
             response.addCookie(cookie);
 
 

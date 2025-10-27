@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -21,10 +20,10 @@ public class TodoService {
     private final TodoMapper todoMapper;
     private final com.ureca.fitlog.auth.mapper.AuthMapper authMapper;
 
-    /** Todo 생성 (세트번호 자동 증가) */
-    @Transactional
-    public TodoCreateResponseDTO createTodo(TodoCreateRequestDTO dto) {
-        // 로그인한 사용자 ID 가져오기
+    /**
+     * 현재 로그인한 사용자의 userId를 가져오는 공통 메서드
+     */
+    private Long getCurrentUserId() {
         String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
         if (loginId == null) {
             throw new IllegalStateException("로그인 정보가 없습니다.");
@@ -35,11 +34,16 @@ public class TodoService {
             throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
         }
 
-        Long userId = user.getUserId();
+        return user.getUserId();
+    }
+
+    /** Todo 생성 (세트번호 자동 증가) */
+    @Transactional
+    public TodoCreateResponseDTO createTodo(TodoCreateRequestDTO dto) {
+        Long userId = getCurrentUserId();
         dto.setUserId(userId);
 
         int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId(), userId);
-
         int nextSetNumber = currentCount + 1;
         dto.setSetsNumber(nextSetNumber);
 
@@ -56,71 +60,64 @@ public class TodoService {
                 .build();
     }
 
-
     /** 개별 세트 완료 토글 (todoId만으로 true/false 자동 반전) */
     public TodoCompleteResponseDTO updateTodoCompletion(Long todoId) {
-        Boolean currentStatus = todoMapper.getIsCompletedById(todoId);
-        Boolean newStatus = (currentStatus != null && currentStatus) ? false : true;
+        Long userId = getCurrentUserId();
 
-        int updated = todoMapper.updateTodoCompletion(todoId, newStatus);
+        Boolean currentStatus = todoMapper.getIsCompletedById(todoId, userId);
+        if (currentStatus == null) {
+            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+        }
 
-        String message = (updated > 0)
-                ? (newStatus ? "세트가 완료 처리되었습니다." : "세트 완료가 해제되었습니다.")
-                : "해당 투두 항목을 찾을 수 없습니다.";
+        Boolean newStatus = !currentStatus;
+        int updated = todoMapper.updateTodoCompletion(todoId, userId, newStatus);
+
+        if (updated == 0) {
+            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+        }
 
         return TodoCompleteResponseDTO.builder()
                 .todoId(todoId)
                 .isCompleted(newStatus)
-                .message(message)
+                .message(newStatus ? "세트가 완료 처리되었습니다." : "세트 완료가 해제되었습니다.")
                 .build();
     }
 
     /** 현재 is_done 상태를 반전시켜 저장 */
     @Transactional
     public boolean toggleTodosDoneStatus(LocalDate date) {
-        // 현재 상태 조회
-        boolean currentStatus = todoMapper.existsTodosDoneTrueByDate(date) > 0;
+        Long userId = getCurrentUserId();
+
+        // 현재 상태 조회 (해당 사용자의 투두만)
+        boolean currentStatus = todoMapper.existsTodosDoneTrueByDate(date, userId) > 0;
 
         // 반전된 상태로 업데이트
         boolean newStatus = !currentStatus;
-        todoMapper.updateTodosDoneStatus(date, newStatus);
+        todoMapper.updateTodosDoneStatus(date, userId, newStatus);
 
         return newStatus;
     }
 
-    /** 투두 수정 */
-//    public TodoCreateResponseDTO updateTodo(TodoRequestDTO dto) {
-//        int updated = todoMapper.updateTodo(dto);
-//
-//        Map<String, Object> response = new HashMap<>();
-//        if (updated > 0) {
-//            response.put("todoId", dto.getTodoId());
-//            response.put("message", "Todo가 성공적으로 수정되었습니다.");
-//        } else {
-//            response.put("message", "해당 Todo가 존재하지 않습니다.");
-//        }
-//        return response;
-//    }
-
     /** 세트당 수행횟수(reps_target)만 수정 */
     @Transactional
     public void updateTodoRepsOnly(Long todoId, int repsTarget) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("todoId", todoId);
-        params.put("repsTarget", repsTarget);
-
-        todoMapper.updateTodoRepsOnly(params);
+        Long userId = getCurrentUserId();
+        int updated = todoMapper.updateTodoRepsOnly(todoId, userId, repsTarget);
+        if (updated == 0) {
+            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+        }
     }
 
     /** 투두 삭제 */
     public Map<String, Object> deleteTodoById(Long todoId) {
-        int deleted = todoMapper.deleteTodoById(todoId);
+        Long userId = getCurrentUserId();
+        int deleted = todoMapper.deleteTodoById(todoId, userId);
         Map<String, Object> response = new HashMap<>();
         if (deleted > 0) {
             response.put("todoId", todoId);
             response.put("message", "TodoList가 성공적으로 삭제되었습니다.");
         } else {
-            response.put("message", "해당 Todo가 존재하지 않습니다.");
+            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
         }
         return response;
     }
@@ -128,10 +125,11 @@ public class TodoService {
     /** 투두 삭제 후 sets_number 재정렬 */
     @Transactional
     public void deleteTodoAndReorder(Long todoId) {
-        // 삭제 대상의 date, exercise_id 조회
-        Map<String, Object> info = todoMapper.findDateAndExerciseIdByTodoId(todoId);
+        Long userId = getCurrentUserId();
+        // 삭제 대상의 date, exercise_id 조회 (본인 소유 확인)
+        Map<String, Object> info = todoMapper.findDateAndExerciseIdByTodoId(todoId, userId);
         if (info == null || info.isEmpty()) {
-            return;
+            throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
         }
 
         Object dateObj = info.get("date");
@@ -142,33 +140,21 @@ public class TodoService {
         Long exerciseId = ((Number) info.get("exercise_id")).longValue();
 
         // 삭제
-        todoMapper.deleteTodoById(todoId);
-
-        // 임시 음수화 (UNIQUE 제약 피하기)
-        todoMapper.tempNegateSetsNumbers(date, exerciseId);
-
-        // 세트번호 재정렬
-        todoMapper.reorderSetsNumbers(date, exerciseId);
+        todoMapper.deleteTodoById(todoId, userId);
+        // 임시 음수화 (UNIQUE 제약 피하기) - 해당 사용자의 투두만
+        todoMapper.tempNegateSetsNumbers(date, exerciseId, userId);
+        // 세트번호 재정렬 - 해당 사용자의 투두만
+        todoMapper.reorderSetsNumbers(date, exerciseId, userId);
     }
 
     /** 휴식 시간 기록 */
     public Map<String, Object> updateRestTime(Long todoId, Integer restTime) {
-        // 로그인한 사용자 정보 가져오기
-        String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
-        if (loginId == null)
-            throw new IllegalStateException("로그인 정보가 없습니다.");
-
-        var user = authMapper.findById(loginId);
-        if (user == null)
-            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
-
-        Long userId = user.getUserId();
+        Long userId = getCurrentUserId();
 
         // 해당 todo가 본인 소유인지 검증하면서 업데이트
         int updated = todoMapper.updateRestTime(todoId, userId, restTime);
 
         if (updated == 0) {
-            // 다른 사람의 todo이거나 존재하지 않음
             throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
         }
 
@@ -183,21 +169,12 @@ public class TodoService {
 
     /** 휴식시간 초기화 */
     public void resetRestTime(Long todoId) {
-        // 현재 로그인한 사용자 검증
-        String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
-        if (loginId == null)
-            throw new IllegalStateException("로그인 정보가 없습니다.");
-
-        var user = authMapper.findById(loginId);
-        if (user == null)
-            throw new IllegalStateException("사용자 정보를 찾을 수 없습니다.");
-
-        Long userId = user.getUserId();
+        Long userId = getCurrentUserId();
 
         // 해당 todo가 본인 소유인지 확인하며 초기화
         int updated = todoMapper.resetRestTime(todoId, userId);
-        if (updated == 0)
+        if (updated == 0) {
             throw new IllegalArgumentException("해당 투두를 찾을 수 없거나 권한이 없습니다.");
+        }
     }
-
 }

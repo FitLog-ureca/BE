@@ -1,4 +1,4 @@
-package com.ureca.fitlog.auth.dto;
+package com.ureca.fitlog.auth.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,6 +1,10 @@
 package com.ureca.fitlog.auth.controller;
 
-import com.ureca.fitlog.auth.dto.*;
+import com.ureca.fitlog.auth.dto.request.LoginRequestDTO;
+import com.ureca.fitlog.auth.dto.request.SignupRequestDTO;
+import com.ureca.fitlog.auth.dto.response.LoginResponseDTO;
+import com.ureca.fitlog.auth.dto.response.LogoutResponseDTO;
+import com.ureca.fitlog.auth.dto.response.SignupResponseDTO;
 import com.ureca.fitlog.auth.jwt.JwtTokenProvider;
 import com.ureca.fitlog.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;

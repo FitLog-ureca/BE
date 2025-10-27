@@ -1,6 +1,11 @@
 package com.ureca.fitlog.auth.service;
 
 import com.ureca.fitlog.auth.dto.*;
+import com.ureca.fitlog.auth.dto.request.LoginRequestDTO;
+import com.ureca.fitlog.auth.dto.request.SignupRequestDTO;
+import com.ureca.fitlog.auth.dto.response.LoginResponseDTO;
+import com.ureca.fitlog.auth.dto.response.LogoutResponseDTO;
+import com.ureca.fitlog.auth.dto.response.SignupResponseDTO;
 import com.ureca.fitlog.auth.mapper.AuthMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

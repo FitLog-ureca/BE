@@ -1,7 +1,8 @@
 package com.ureca.fitlog.todos.service;
 
-import com.ureca.fitlog.common.SecurityUtil;
-import com.ureca.fitlog.todos.dto.*;
+import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
+import com.ureca.fitlog.todos.dto.response.TodoCompleteResponseDTO;
+import com.ureca.fitlog.todos.dto.response.TodoCreateResponseDTO;
 import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

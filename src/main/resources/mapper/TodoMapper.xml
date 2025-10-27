@@ -15,7 +15,7 @@
 
     <!-- 투두 생성 -->
     <insert id="insertTodo"
-            parameterType="com.ureca.fitlog.todos.dto.TodoCreateRequestDTO"
+            parameterType="com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO"
             useGeneratedKeys="true"
             keyProperty="todoId">
         INSERT INTO todos (

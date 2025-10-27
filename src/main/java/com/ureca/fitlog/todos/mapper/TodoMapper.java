@@ -1,6 +1,6 @@
 package com.ureca.fitlog.todos.mapper;
 
-import com.ureca.fitlog.todos.dto.TodoCreateRequestDTO;
+import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

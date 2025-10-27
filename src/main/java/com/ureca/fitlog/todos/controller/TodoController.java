@@ -1,6 +1,11 @@
 package com.ureca.fitlog.todos.controller;
 
-import com.ureca.fitlog.todos.dto.*;
+import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
+import com.ureca.fitlog.todos.dto.request.UpdateRestTimeRequestDTO;
+import com.ureca.fitlog.todos.dto.response.TodoCompleteResponseDTO;
+import com.ureca.fitlog.todos.dto.response.TodoCreateResponseDTO;
+import com.ureca.fitlog.todos.dto.response.TodoDoneResponseDTO;
+import com.ureca.fitlog.todos.dto.response.UpdateRestTimeResponseDTO;
 import com.ureca.fitlog.todos.service.TodoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

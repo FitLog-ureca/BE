@@ -124,16 +124,16 @@ public class TodoController {
             @PathVariable Long todoId,
             @RequestBody UpdateRestTimeRequestDTO request
     ) {
-        Integer restTime = request.getRestTime();
-
-        // 유효성 검증
-        if (restTime == null || restTime < 0 || restTime > 7200) {
-            throw new IllegalArgumentException("restTime은 0~7200초 사이여야 합니다.");
-        }
+//        Integer restTime = request.getRestTime();
+//
+//        // 유효성 검증
+//        if (restTime == null || restTime < 0 || restTime > 7200) {
+//            throw new IllegalArgumentException("restTime은 0~7200초 사이여야 합니다.");
+//        }
 
         // 서비스 호출
-        Map<String, Object> result = todoService.updateRestTime(todoId, restTime);
-
+//        Map<String, Object> result = todoService.updateRestTime(todoId, restTime);
+        Map<String, Object> result = todoService.updateRestTime(todoId, request.getRestTime());
         UpdateRestTimeResponseDTO response = UpdateRestTimeResponseDTO.builder()
                 .todoId((Long) result.get("todoId"))
                 .restTime((Integer) result.get("restTime"))
@@ -156,32 +156,13 @@ public class TodoController {
     @Operation(
             summary = "세트별 휴식시간 초기화"
     )
-    public ResponseEntity<?> resetRestTime(@PathVariable Long todoId) {
-        try {
-            todoService.resetRestTime(todoId);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(401).body(Map.of(
-                    "status", 401,
-                    "error", "UNAUTHORIZED",
-                    "message", e.getMessage()
-            ));
-        } catch (SecurityException e) {
-            return ResponseEntity.status(403).body(Map.of(
-                    "status", 403,
-                    "error", "FORBIDDEN",
-                    "message", e.getMessage()
-            ));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(Map.of(
-                    "status", 404,
-                    "error", "NOT_FOUND",
-                    "message", e.getMessage()
-            ));
-        }
+    public ResponseEntity<Map<String, Object>> resetRestTime(@PathVariable Long todoId) {
+        todoService.resetRestTime(todoId);
 
         return ResponseEntity.ok(Map.of(
                 "todoId", todoId,
                 "message", "휴식시간이 초기화되었습니다."
         ));
     }
+
 }

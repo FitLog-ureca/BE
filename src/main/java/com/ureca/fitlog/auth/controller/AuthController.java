@@ -41,28 +41,43 @@ public class AuthController {
             summary = "로그인"
     )
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
-            LoginResponseDTO loginResult = authService.login(request);
-            // JWT 토큰 생성
-            String token = jwtTokenProvider.createToken(loginResult.getLoginId());
-            int cookieMaxAge = (int) (jwtTokenProvider.getValidityInMilliseconds());
+        try {
+            LoginResponseDTO loginResponse = authService.login(request);
+            // refresh token을 쿠키로 내려보냄
+            Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(false);
+            refreshCookie.setPath("/");
+            refreshCookie.setMaxAge(7*24*60*60); // 7일
+            response.setHeader("Set-Cookie",
+                    "refreshToken=" + loginResponse.getRefreshToken()
+                            + "; Path=/"
+                            + "; HttpOnly"
+                            + "; Max-Age=" + (7*24*60*60)
+                            + "; SameSite=None"
+//                            + "; Secure"
+            );  // 로컬이면 Secure 제거
+            response.addCookie(refreshCookie);
 
-            Cookie cookie = new Cookie("accessToken", token);
-            cookie.setHttpOnly(true);  // JS 접근 불가
-            cookie.setSecure(true);    // HTTPS 전용
-            cookie.setPath("/");       // 모든 경로에 유효
-            cookie.setMaxAge(cookieMaxAge); // 1시간 (AccessToken 유효기간과 동일)
-            response.addCookie(cookie);
-
-
-            // Builder로 새 객체 생성
-            LoginResponseDTO responseBody = LoginResponseDTO.builder()
-                    .message("로그인에 성공했습니다.")
-                    .loginId(loginResult.getLoginId())
-                    .name(loginResult.getName())
-                    .token(token)
-                    .build();
-
-            return ResponseEntity.ok(responseBody);
+            // access token만 body로 전달
+            return ResponseEntity.ok(
+                    LoginResponseDTO.builder()
+                            .loginId(loginResponse.getLoginId())
+                            .name(loginResponse.getName())
+                            .accessToken(loginResponse.getAccessToken())
+                            .build()
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(LoginResponseDTO.builder()
+                            .message("아이디 또는 비밀번호가 올바르지 않습니다.")
+                            .build());
+        }  catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(LoginResponseDTO.builder()
+                            .message("로그인 처리 중 오류가 발생했습니다.")
+                            .build());
+        }
     }
     /** 로그아웃 (쿠키 삭제) */
     @PostMapping("/logout")
@@ -70,9 +85,10 @@ public class AuthController {
             summary = "로그아웃"
     )
     public ResponseEntity<LogoutResponseDTO> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("accessToken", null);
+        // refresh token 삭제
+        Cookie cookie = new Cookie("refreshToken", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // FIXME: 배포시 true로 변경 필수
+        cookie.setSecure(false); // TODO: 배포시 true로 변경 필수
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);

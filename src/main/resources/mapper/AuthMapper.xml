@@ -16,7 +16,7 @@
         SELECT LAST_INSERT_ID();
     </select>
     <!-- 로그인: ID로 유저 조회 -->
-    <select id="findById" parameterType="string" resultType="com.ureca.fitlog.auth.dto.UserInfo">
+    <select id="findByLoginId" parameterType="string" resultType="com.ureca.fitlog.auth.dto.UserInfo">
         SELECT user_id AS userId,
                login_id AS loginId,
                username AS username,

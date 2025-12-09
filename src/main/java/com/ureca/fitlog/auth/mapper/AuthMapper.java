@@ -4,7 +4,6 @@ import com.ureca.fitlog.auth.dto.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Optional;
 
 @Mapper
 public interface AuthMapper {
@@ -16,5 +15,5 @@ public interface AuthMapper {
 
     Long findLastInsertId();
     Long findUserIdByLoginId(@Param("loginId") String loginId);
-    UserInfo findById(@Param("loginId") String loginId);
+    UserInfo findByLoginId(@Param("loginId") String loginId);
 }

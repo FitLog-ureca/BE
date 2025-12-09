@@ -17,26 +17,41 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final Key key;
+
     @Getter
-    private final long validityInMilliseconds;
+    private final long accessTokenValidity;  // ms
+    private final long refreshTokenValidity; // ms
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration}") long validityInMilliseconds
+            @Value("${jwt.access-expiration}") long accessTokenValidity,
+            @Value("${jwt.refresh-expiration}") long refreshTokenValidity
     ) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.validityInMilliseconds = validityInMilliseconds;
+        this.accessTokenValidity = accessTokenValidity;
+        this.refreshTokenValidity = refreshTokenValidity;
     }
 
-    /** JWT 토큰 생성 */
-    public String createToken(String loginId) {
+    /** JWT Access Token 생성 */
+    public String createAccessToken(String loginId) {
+        System.out.println("access token 발급 완료");
+        return buildToken(loginId, accessTokenValidity);
+    }
+
+    /** refresh token 생성 */
+    public String createRefreshToken(String loginId) {
+        System.out.println("refresh token 발급 완료");
+        return buildToken(loginId, refreshTokenValidity);
+    }
+
+    private String buildToken(String loginId, long validity) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds); // 설정값 기반 만료시간
+        Date expire =  new Date(now.getTime() + validity);
 
         return Jwts.builder()
                 .setSubject(loginId)
                 .setIssuedAt(now)
-                .setExpiration(validity)
+                .setExpiration(expire)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -84,7 +99,7 @@ public class JwtTokenProvider {
         String username = getUsername(token);
         return new UsernamePasswordAuthenticationToken(
                 username,
-                "",
+                null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
     }

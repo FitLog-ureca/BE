@@ -23,9 +23,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        // 1. request header에서 토큰을 꺼냄
+        String token = extractAccessTokenFromHeader(request);
 
-        String token = extractTokenFromCookies(request);
-
+        // validateToken으로 유효성 검사
+        // 정상토큰이면 해당 토큰으로 Authentication을 가져와서 SecurityContext에 저장
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -34,10 +36,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String extractTokenFromCookies(HttpServletRequest request) {
+    // 2. Authorization 헤더에서 Bearer 토큰 추출
+    private String extractAccessTokenFromHeader(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
+        }
+        return null;
+    }
+
+    // 3. Refresh Token 재발급 필터 만들 때
+    private String extractRefreshTokenFromCookies(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
+
         for (Cookie cookie : request.getCookies()) {
-            if ("accessToken".equals(cookie.getName())) {
+            if ("refreshToken".equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }

@@ -23,28 +23,24 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                        UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                // Swagger 관련
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/swagger-ui.html",
-                                "/auth/**"
+                                // 인증 관련
+                                "/auth/signup",
+                                "/auth/login",
+                                "/auth/refresh"
                         ).permitAll()
+                        // 나머지는 인증 필요
                         .anyRequest().authenticated()
-                )
-//                        .requestMatchers("*").permitAll()
-//                                "/swagger-ui/**",
-//                                "/v3/api-docs/**",
-//                                "/swagger-resources/**",
-//                                "/webjars/**",
-//                                "/swagger-ui.html",
-//                                "/auth/**"
-//                )
-//                .anyRequest().authenicated()
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class);
+                );
 
         return http.build();
     }

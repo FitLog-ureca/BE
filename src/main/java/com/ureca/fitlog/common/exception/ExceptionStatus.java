@@ -76,6 +76,14 @@ public enum ExceptionStatus {
     AUTH_TOKEN_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 생성에 실패했습니다"),
 
     // =================================================================
+    // AUTH TOKEN EXCEPTIONS
+    // =================================================================
+    AUTH_TOKEN_REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 존재하지 않습니다"),
+    AUTH_TOKEN_REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 유효하지 않습니다"),
+    AUTH_TOKEN_REFRESH_TOKEN_MISMATCH(HttpStatus.UNAUTHORIZED, "저장된 리프레시 토큰과 일치하지 않습니다"),
+    AUTH_TOKEN_REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다"),
+
+    // =================================================================
     // PROFILE DOMAIN EXCEPTIONS
     // =================================================================
     PROFILE_DOMAIN_NOT_FOUND(HttpStatus.NOT_FOUND, "프로필 정보를 찾을 수 없습니다"),

@@ -1,12 +1,13 @@
 package com.ureca.fitlog.auth.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class RefreshTokenResponseDTO {
+    private String message;
     private String accessToken;
 }

@@ -31,4 +31,27 @@
         WHERE login_id = #{loginId}
             LIMIT 1;
     </select>
+
+    <!-- ID 중복 체크 -->
+    <select id="existsByLoginId" parameterType="string" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM users
+            WHERE login_id = #{loginId}
+        );
+    </select>
+
+    <update id="updateRefreshToken">
+        UPDATE users
+        SET refresh_token = #{refreshToken},
+            refresh_token_expire = #{expire}
+        WHERE login_id = #{loginId};
+    </update>
+
+    <select id="findRefreshTokenByLoginId" parameterType="string" resultType="string">
+        SELECT refresh_token
+        FROM users
+        WHERE login_id = #{loginId}
+            LIMIT 1;
+    </select>
 </mapper>

@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/fitlog
     username: root
-    password: ureca
+    password: urecaureca
 
 springdoc:
   api-docs:
@@ -22,7 +22,8 @@ mybatis:
   type-aliases-package: com.ureca.fitlog.dto
 
 jwt:
-  expiration: 86400000
+  access-expiration: 3600000
+  refresh-expiration: 604800000
   secret: 914da3709fcbc4284f731eae7f54503cc6f2010ae743d130fb74006401461ec5
 
 logging:

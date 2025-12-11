@@ -4,12 +4,13 @@ import com.ureca.fitlog.auth.dto.request.LoginRequestDTO;
 import com.ureca.fitlog.auth.dto.request.SignupRequestDTO;
 import com.ureca.fitlog.auth.dto.response.LoginResponseDTO;
 import com.ureca.fitlog.auth.dto.response.LogoutResponseDTO;
+import com.ureca.fitlog.auth.dto.response.RefreshTokenResponseDTO;
 import com.ureca.fitlog.auth.dto.response.SignupResponseDTO;
-import com.ureca.fitlog.auth.jwt.JwtTokenProvider;
 import com.ureca.fitlog.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     /** 회원가입 */
     @PostMapping("/signup")
@@ -37,47 +37,57 @@ public class AuthController {
 
     /** 로그인 (JWT 발급 포함) */
     @PostMapping("/login")
-    @Operation(
-            summary = "로그인"
-    )
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request, HttpServletResponse response) {
-            LoginResponseDTO loginResult = authService.login(request);
-            // JWT 토큰 생성
-            String token = jwtTokenProvider.createToken(loginResult.getLoginId());
-            int cookieMaxAge = (int) (jwtTokenProvider.getValidityInMilliseconds());
+    @Operation(summary = "로그인")
+    public ResponseEntity<LoginResponseDTO> login(
+            @RequestBody LoginRequestDTO request,
+            HttpServletResponse response) {
 
-            Cookie cookie = new Cookie("accessToken", token);
-            cookie.setHttpOnly(true);  // JS 접근 불가
-            cookie.setSecure(true);    // HTTPS 전용
-            cookie.setPath("/");       // 모든 경로에 유효
-            cookie.setMaxAge(cookieMaxAge); // 1시간 (AccessToken 유효기간과 동일)
-            response.addCookie(cookie);
+        LoginResponseDTO loginResponse = authService.login(request);
 
+        // refresh token을 쿠키로 내려보냄
+        Cookie refreshCookie = new Cookie("refreshToken", loginResponse.getRefreshToken());
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(false);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7일
+        response.addCookie(refreshCookie);
 
-            // Builder로 새 객체 생성
-            LoginResponseDTO responseBody = LoginResponseDTO.builder()
-                    .message("로그인에 성공했습니다.")
-                    .loginId(loginResult.getLoginId())
-                    .name(loginResult.getName())
-                    .token(token)
-                    .build();
-
-            return ResponseEntity.ok(responseBody);
+        // access token만 body로 전달 (refreshToken 제외)
+        return ResponseEntity.ok(
+                LoginResponseDTO.builder()
+                        .message(loginResponse.getMessage())
+                        .loginId(loginResponse.getLoginId())
+                        .name(loginResponse.getName())
+                        .accessToken(loginResponse.getAccessToken())
+                        .build()
+        );
     }
+
     /** 로그아웃 (쿠키 삭제) */
     @PostMapping("/logout")
     @Operation(
             summary = "로그아웃"
     )
-    public ResponseEntity<LogoutResponseDTO> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("accessToken", null);
+    public ResponseEntity<LogoutResponseDTO> logout(HttpServletRequest request, HttpServletResponse response) {
+        // service에서 DB의 refresh token 삭제
+        LogoutResponseDTO res = authService.logout(request);
+
+        // refresh token 삭제
+        Cookie cookie = new Cookie("refreshToken", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // FIXME: 배포시 true로 변경 필수
+        cookie.setSecure(false); // TODO: 배포시 true로 변경 필수
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
 
-        LogoutResponseDTO res = LogoutResponseDTO.of("로그아웃 되었습니다.");
         return ResponseEntity.ok(res);
+    }
+
+    /** 리프레시 토큰 요청 */
+    @PostMapping("/refresh")
+    @Operation(summary = "리프레시 토큰 요청")
+    public ResponseEntity<RefreshTokenResponseDTO> refresh(HttpServletRequest request) {
+        RefreshTokenResponseDTO response = authService.refreshAccessToken(request);
+        return ResponseEntity.ok(response);
     }
 }

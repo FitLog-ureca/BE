@@ -2,6 +2,8 @@ package com.ureca.fitlog.auth.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,26 +19,41 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final Key key;
+
     @Getter
-    private final long validityInMilliseconds;
+    private final long accessTokenValidity;  // ms
+    private final long refreshTokenValidity; // ms
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration}") long validityInMilliseconds
+            @Value("${jwt.access-expiration}") long accessTokenValidity,
+            @Value("${jwt.refresh-expiration}") long refreshTokenValidity
     ) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.validityInMilliseconds = validityInMilliseconds;
+        this.accessTokenValidity = accessTokenValidity;
+        this.refreshTokenValidity = refreshTokenValidity;
     }
 
-    /** JWT 토큰 생성 */
-    public String createToken(String loginId) {
+    /** JWT Access Token 생성 */
+    public String createAccessToken(String loginId) {
+        System.out.println("access token 발급 완료");
+        return buildToken(loginId, accessTokenValidity);
+    }
+
+    /** refresh token 생성 */
+    public String createRefreshToken(String loginId) {
+        System.out.println("refresh token 발급 완료");
+        return buildToken(loginId, refreshTokenValidity);
+    }
+
+    private String buildToken(String loginId, long validity) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds); // 설정값 기반 만료시간
+        Date expire =  new Date(now.getTime() + validity);
 
         return Jwts.builder()
                 .setSubject(loginId)
                 .setIssuedAt(now)
-                .setExpiration(validity)
+                .setExpiration(expire)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -84,9 +101,23 @@ public class JwtTokenProvider {
         String username = getUsername(token);
         return new UsernamePasswordAuthenticationToken(
                 username,
-                "",
+                null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
+    }
+
+    /** 쿠키에서 Refresh Token 추출 */
+    public String extractRefreshTokenFromCookies(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("refreshToken".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
 }

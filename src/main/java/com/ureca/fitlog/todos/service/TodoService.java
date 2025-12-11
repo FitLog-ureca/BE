@@ -31,7 +31,7 @@ public class TodoService {
             throw new BusinessException(ExceptionStatus.TODO_AUTH_LOGIN_INFO_NOT_FOUND);
         }
 
-        var user = authMapper.findById(loginId);
+        var user = authMapper.findByLoginId(loginId);
         if (user == null) {
             throw new BusinessException(ExceptionStatus.TODO_AUTH_USER_NOT_FOUND);
         }

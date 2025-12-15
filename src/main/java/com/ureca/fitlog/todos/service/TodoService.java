@@ -57,6 +57,7 @@ public class TodoService {
                 .exerciseId(dto.getExerciseId())
                 .setsNumber(dto.getSetsNumber())
                 .repsTarget(dto.getRepsTarget())
+                .weight(dto.getWeight())
                 .date(dto.getDate())
                 .isCompleted(false)
                 .message("투두가 성공적으로 생성되었습니다.")

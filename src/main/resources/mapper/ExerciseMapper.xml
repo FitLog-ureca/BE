@@ -14,6 +14,7 @@
             e.name AS exerciseName,
             t.sets_number AS setsNumber,
             t.reps_target AS repsTarget,
+            t.weight AS weight,
             t.rest_time AS restTime,
             t.is_completed AS isCompleted,
             e.default_calories_per_set AS caloriesPerRep,

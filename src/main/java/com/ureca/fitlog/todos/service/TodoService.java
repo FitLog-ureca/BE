@@ -3,6 +3,7 @@ package com.ureca.fitlog.todos.service;
 import com.ureca.fitlog.common.exception.BusinessException;
 import com.ureca.fitlog.common.exception.ExceptionStatus;
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
+import com.ureca.fitlog.todos.dto.request.UpdateTodoRecordRequestDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCompleteResponseDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCreateResponseDTO;
 import com.ureca.fitlog.todos.mapper.TodoMapper;
@@ -111,6 +112,31 @@ public class TodoService {
         }
 
         int updated = todoMapper.updateTodoRepsOnly(todoId, userId, repsTarget);
+        if (updated == 0) {
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
+        }
+    }
+
+    /** 세트 기록 수정 */
+    @Transactional
+    public void updateTodoRecord(Long todoId, UpdateTodoRecordRequestDTO request) {
+        Long userId = getCurrentUserId();
+
+        if (request.getRepsTarget() != null && request.getRepsTarget() <= 0) {
+            throw new BusinessException(ExceptionStatus.TODO_VALIDATION_REPS_TARGET_INVALID);
+        }
+
+        if (request.getWeight() != null && request.getWeight() < 0) {
+            throw new BusinessException(ExceptionStatus.TODO_VALIDATION_WEIGHT_INVALID);
+        }
+
+        int updated = todoMapper.updateTodoRecord(
+                todoId,
+                userId,
+                request.getRepsTarget(),
+                request.getWeight()
+        );
+
         if (updated == 0) {
             throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }

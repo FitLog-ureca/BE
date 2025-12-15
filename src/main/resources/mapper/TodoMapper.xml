@@ -57,6 +57,18 @@
           AND user_id = #{userId};
     </update>
 
+    <!-- 투두 reps_target, weight 수정 (userId 검증 포함) -->
+    <update id="updateTodoRecord">
+        UPDATE todos
+        SET
+            reps_target = COALESCE(#{repsTarget}, reps_target),
+            weight      = COALESCE(#{weight}, weight),
+            updated_at  = CURRENT_TIMESTAMP
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId};
+    </update>
+
+
     <!-- 세트번호 임시 음수화 (userId 필터링) -->
     <update id="tempNegateSetsNumbers" parameterType="map">
         UPDATE todos

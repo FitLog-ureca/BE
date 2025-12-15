@@ -26,6 +26,14 @@ public interface TodoMapper {
                            @Param("userId") Long userId,
                            @Param("repsTarget") int repsTarget);
 
+    /** 세트 기록 수정 */
+    int updateTodoRecord(
+            @Param("todoId") Long todoId,
+            @Param("userId") Long userId,
+            @Param("repsTarget") Integer repsTarget,
+            @Param("weight") Double weight
+    );
+
     /** [READ] 특정 날짜와 운동 종목에 대한 투두리스트(세트) 개수 조회 */
     int countSetsByDateAndExercise(@Param("date") LocalDate date,
                                    @Param("exerciseId") Long exerciseId,

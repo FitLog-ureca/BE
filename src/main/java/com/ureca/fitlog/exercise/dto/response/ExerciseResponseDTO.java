@@ -22,6 +22,7 @@ public class ExerciseResponseDTO {
         private String exerciseName;                  // 운동 이름
         private Integer setsNumber;                   // 세트 수
         private Integer repsTarget;                   // 세트당 횟수/시간
+        private Double weight;                        // 중량
         private Integer restTime;                     // 휴식(초)
         private Boolean isCompleted;                  // 세트 완료 여부
         private Double caloriesPerRep;                // 1회(혹은 1단위)당 칼로리

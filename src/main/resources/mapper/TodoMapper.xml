@@ -19,7 +19,7 @@
             useGeneratedKeys="true"
             keyProperty="todoId">
         INSERT INTO todos (
-            user_id, exercise_id, date, sets_number, reps_target, rest_time
+            user_id, exercise_id, date, sets_number, reps_target, weight, rest_time
         )
         VALUES (
                    #{userId},
@@ -27,6 +27,7 @@
                    #{date},
                    #{setsNumber},
                    #{repsTarget},
+                   #{weight},
                    #{restTime}
                );
     </insert>

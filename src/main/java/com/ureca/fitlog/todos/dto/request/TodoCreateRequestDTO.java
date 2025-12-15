@@ -20,6 +20,7 @@ public class TodoCreateRequestDTO {
     @Schema(hidden = true)
     private Integer setsNumber;   // 세트 수
     private Integer repsTarget;   // 세트당 목표 횟수
+    private Double weight;        // 중량, (유산소면 null)
     @Schema(hidden = true)
     private Integer restTime;     // 총 휴식시간 (초 단위)
 }

@@ -31,6 +31,9 @@
             <if test="request.bio != null">
                 bio = #{request.bio},
             </if>
+            <if test="request.bio == null">
+                bio = NULL,
+            </if>
             <!-- shouldUpdateImage가 true일 때만 이미지 업데이트 (null 포함) -->
             <if test="shouldUpdateImage">
                 profile_image = #{profileImage},

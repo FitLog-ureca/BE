@@ -95,6 +95,9 @@ public enum ExceptionStatus {
     FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일 크기가 5MB를 초과했습니다"),
     INVALID_FILE_TYPE( HttpStatus.BAD_REQUEST,"지원하지 않는 파일 형식입니다"),
     FILE_CONVERSION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 변환에 실패했습니다"),
+    PROFILE_USERNAME_REQUIRED(HttpStatus.BAD_REQUEST,"이름은 필수입니다."
+    ),
+
 
 
     // =================================================================

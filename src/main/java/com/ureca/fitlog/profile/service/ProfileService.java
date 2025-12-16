@@ -141,6 +141,10 @@ public class ProfileService {
             throw new BusinessException(ExceptionStatus.TODO_AUTH_LOGIN_INFO_NOT_FOUND);
         }
 
+        if(request.getUsername() == null || request.getUsername().isBlank()) {
+            throw new BusinessException(ExceptionStatus.PROFILE_USERNAME_REQUIRED);
+        }
+
         // 이미지 업데이트 여부 판단
         String base64Image = null;
         boolean shouldUpdateImage = false;

@@ -4,15 +4,13 @@ import com.ureca.fitlog.profile.dto.request.ProfileRequestDTO;
 import com.ureca.fitlog.profile.dto.response.ProfileResponseDTO;
 import com.ureca.fitlog.profile.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,14 +30,16 @@ public class ProfileController {
     }
 
     /** 프로필 수정 */
-    @PutMapping("/update")
+    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "프로필 수정")
     public ResponseEntity<ProfileResponseDTO> updateProfile(
             Authentication authentication,
-            @RequestBody ProfileRequestDTO request
+            @RequestPart(value = "profile") ProfileRequestDTO request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ) {
         String loginId = authentication.getName();
-        ProfileResponseDTO updatedProfile = profileService.updateProfile(loginId, request);
+        ProfileResponseDTO updatedProfile = profileService.updateProfile(loginId, request, profileImage);
+
         return ResponseEntity.ok(updatedProfile);
     }
 }

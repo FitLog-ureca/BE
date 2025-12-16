@@ -2,6 +2,7 @@ package com.ureca.fitlog.todos.controller;
 
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
 import com.ureca.fitlog.todos.dto.request.UpdateRestTimeRequestDTO;
+import com.ureca.fitlog.todos.dto.request.UpdateTodoRecordRequestDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCompleteResponseDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCreateResponseDTO;
 import com.ureca.fitlog.todos.dto.response.TodoDoneResponseDTO;
@@ -95,6 +96,20 @@ public class TodoController {
                 "message", "세트당 횟수가 수정되었습니다."
         ));
     }
+
+    /** 세트 기록 수정 */
+    @PatchMapping("/record/{todoId}")
+    @Operation(summary = "세트 기록 수정 (reps + weight)")
+    public ResponseEntity<Map<String, String>> updateTodoRecord(
+            @PathVariable Long todoId,
+            @RequestBody UpdateTodoRecordRequestDTO request
+    ) {
+        todoService.updateTodoRecord(todoId, request);
+        return ResponseEntity.ok(Map.of(
+                "message", "세트 기록이 수정되었습니다."
+        ));
+    }
+
 
     /** 투두리스트(세트) 삭제 및 sets_number 자동 재정렬 */
     @DeleteMapping("/{todoId}")

@@ -46,6 +46,8 @@ public enum ExceptionStatus {
     TODO_VALIDATION_REST_TIME_INVALID(HttpStatus.BAD_REQUEST, "휴식시간은 0~7200초 사이여야 합니다"),
     TODO_VALIDATION_REPS_TARGET_INVALID(HttpStatus.BAD_REQUEST, "목표 횟수는 양수여야 합니다"),
     TODO_VALIDATION_SETS_NUMBER_INVALID(HttpStatus.BAD_REQUEST, "세트 번호는 양수여야 합니다"),
+    TODO_VALIDATION_WEIGHT_INVALID(HttpStatus.BAD_REQUEST, "중량은 0 이상이어야 합니다"),
+
 
     // =================================================================
     // EXERCISE DOMAIN EXCEPTIONS

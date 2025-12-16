@@ -10,3 +10,4 @@ public class UpdateRestTimeRequestDTO {
     @Schema(description = "휴식시간(초 단위)", example = "60")
     private Integer restTime;
 }
+

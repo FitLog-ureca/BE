@@ -10,6 +10,7 @@
             resultType="com.ureca.fitlog.exercise.dto.response.ExerciseResponseDTO$ExerciseItem">
         SELECT
             t.todo_id AS todoId,
+            t.workout_id AS workoutId,
             t.exercise_id AS exerciseId,
             e.name AS exerciseName,
             t.sets_number AS setsNumber,
@@ -31,6 +32,7 @@
             resultType="com.ureca.fitlog.exercise.dto.response.ExerciseResponseDTO$ExerciseItem">
         SELECT
             t.todo_id AS todoId,
+            t.workout_id AS workoutId,
             t.exercise_id AS exerciseId,
             e.name AS exerciseName,
             t.sets_number AS setsNumber,

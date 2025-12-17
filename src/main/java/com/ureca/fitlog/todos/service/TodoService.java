@@ -43,24 +43,42 @@ public class TodoService {
     /** Todo 생성 (세트번호 자동 증가) */
     @Transactional
     public TodoCreateResponseDTO createTodo(TodoCreateRequestDTO dto) {
-        Long userId = getCurrentUserId();
-        dto.setUserId(userId);
+        /** 기존 todos/create API 로직 */
+//        Long userId = getCurrentUserId();
+//        dto.setUserId(userId);
+//
+//        int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId(), userId);
+//        int nextSetNumber = currentCount + 1;
+//        dto.setSetsNumber(nextSetNumber);
+//
+//        todoMapper.insertTodo(dto);
+//
+//        return TodoCreateResponseDTO.builder()
+//                .todoId(dto.getTodoId())
+//                .exerciseId(dto.getExerciseId())
+//                .setsNumber(dto.getSetsNumber())
+//                .repsTarget(dto.getRepsTarget())
+//                .weight(dto.getWeight())
+//                .date(dto.getDate())
+//                .isCompleted(false)
+//                .message("투두가 성공적으로 생성되었습니다.")
+//                .build();
 
-        int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId(), userId);
-        int nextSetNumber = currentCount + 1;
-        dto.setSetsNumber(nextSetNumber);
+        /** todos/ 로직 */
+        // 🔥 핵심: 운동 항목 생성 시 항상 Set 1
+        dto.setSetsNumber(1);
 
         todoMapper.insertTodo(dto);
 
         return TodoCreateResponseDTO.builder()
                 .todoId(dto.getTodoId())
                 .exerciseId(dto.getExerciseId())
-                .setsNumber(dto.getSetsNumber())
+                .setsNumber(1)
                 .repsTarget(dto.getRepsTarget())
                 .weight(dto.getWeight())
                 .date(dto.getDate())
                 .isCompleted(false)
-                .message("투두가 성공적으로 생성되었습니다.")
+                .message("운동 항목이 생성되었습니다.")
                 .build();
     }
 

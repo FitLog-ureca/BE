@@ -29,13 +29,28 @@ public class TodoController {
     private final TodoService todoService;
 
     /** 날짜별 투두 생성 */
+    /** ❌운동 항목 생성 API는 POST /todos 를 사용하세요 */
+    @Deprecated
     @PostMapping("/create")
     @Operation(
             summary = "운동 목표(todos) 생성"
     )
-    public ResponseEntity<TodoCreateResponseDTO> createTodo(@RequestBody TodoCreateRequestDTO createRequestDto) {
+    public ResponseEntity<TodoCreateResponseDTO> createTodoDeprecated(@RequestBody TodoCreateRequestDTO createRequestDto) {
+        // 🔹 기존 로직 재사용 (중복 제거)
         return ResponseEntity.ok(todoService.createTodo(createRequestDto));
     }
+
+    /** 운동 항목 추가 버튼으로 투두 생성 - sets_number = 1로 생성 */
+    @PostMapping
+    @Operation(summary = "운동 항목(todo) 생성",
+            description = "운동 항목을 생성합니다. 항상 첫 번째 세트(sets_number=1)로 생성됩니다.")
+    @ApiResponse(responseCode = "200", description = "운동 항목 생성 성공")
+    public ResponseEntity<TodoCreateResponseDTO> createTodo(
+            @RequestBody TodoCreateRequestDTO request
+    ) {
+        return ResponseEntity.ok(todoService.createTodo(request));
+    }
+
 
     /** 운동 완료 상태 토글 (true ↔ false 자동 전환) */
     @PatchMapping("/done/{date}")

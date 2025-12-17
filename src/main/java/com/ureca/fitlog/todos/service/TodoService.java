@@ -87,29 +87,41 @@ public class TodoService {
 
     /** todos/{todoId}/sets 서비스 로직 */
     @Transactional
-    public TodoCreateResponseDTO addSet(Long baseTodoId) {
+    public TodoCreateResponseDTO addSet(Long todoId) {
         Long userId = getCurrentUserId();
 
-        // 1️⃣ 기준 todo 정보 조회
-        Map<String, Object> baseInfo =
-                todoMapper.findDateAndExerciseIdByTodoId(baseTodoId, userId);
+        // 1️⃣ 기준이 되는 Set 1 todoId 찾기
+        Long baseTodoId =
+                todoMapper.findNearestBaseTodoId(todoId, userId);
 
-        if (baseInfo == null) {
-            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
+        if (baseTodoId == null) {
+            throw new BusinessException(
+                    ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION
+            );
         }
 
-        LocalDate date = ((java.sql.Date) baseInfo.get("date")).toLocalDate();
-        Long exerciseId = ((Number) baseInfo.get("exercise_id")).longValue();
+        // 2️⃣ 해당 운동 항목 묶음 안에서 max sets_number 조회
+        int maxSet =
+                todoMapper.findMaxSetsNumberInWorkoutRange(baseTodoId, userId);
 
-        // 2️⃣ 해당 운동 항목의 최대 세트 번호
-        int maxSetNumber =
-                todoMapper.findMaxSetsNumberByTodoId(baseTodoId, userId);
+        int nextSetNumber = maxSet + 1;
 
+        // 3️⃣ 기준 todo 정보 조회
+        Map<String, Object> info =
+                todoMapper.findDateAndExerciseIdByTodoId(baseTodoId, userId);
+
+        LocalDate date = (info.get("date") instanceof LocalDate)
+                ? (LocalDate) info.get("date")
+                : ((java.sql.Date) info.get("date")).toLocalDate();
+
+        Long exerciseId = ((Number) info.get("exercise_id")).longValue();
+
+        // 4️⃣ 세트 생성
         TodoCreateRequestDTO dto = TodoCreateRequestDTO.builder()
                 .userId(userId)
                 .date(date)
                 .exerciseId(exerciseId)
-                .setsNumber(maxSetNumber + 1)
+                .setsNumber(nextSetNumber)
                 .build();
 
         todoMapper.insertTodo(dto);
@@ -117,13 +129,12 @@ public class TodoService {
         return TodoCreateResponseDTO.builder()
                 .todoId(dto.getTodoId())
                 .exerciseId(exerciseId)
-                .setsNumber(dto.getSetsNumber())
+                .setsNumber(nextSetNumber)
                 .date(date)
                 .isCompleted(false)
                 .message("세트가 추가되었습니다.")
                 .build();
     }
-
 
     /** 개별 세트 완료 토글 (todoId만으로 true/false 자동 반전) */
     public TodoCompleteResponseDTO updateTodoCompletion(Long todoId) {

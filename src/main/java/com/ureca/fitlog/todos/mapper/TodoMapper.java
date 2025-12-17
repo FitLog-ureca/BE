@@ -9,13 +9,22 @@ import java.util.Map;
 
 @Mapper
 public interface TodoMapper {
-    /** [CREATE] 새로운 투두리스트(운동 세트) 생성 */
+    /** [CREATE] - todos/ 새로운 투두리스트(운동 세트) 생성 */
     void insertTodo(TodoCreateRequestDTO dto);
 
-    /** [CREATE] 새로운 세트항목(기존 운동 항목 기반) 생성 */
+    /** [CREATE] - todos/{todoId}/sets 새로운 세트항목(기존 운동 항목 기반) 생성 */
     int findMaxSetsNumberByTodoId(@Param("todoId") Long todoId,
                                   @Param("userId") Long userId);
 
+    Long findNearestBaseTodoId(
+            @Param("todoId") Long todoId,
+            @Param("userId") Long userId
+    );
+
+    Integer findMaxSetsNumberInWorkoutRange(
+            @Param("baseTodoId") Long baseTodoId,
+            @Param("userId") Long userId
+    );
 
     /** [READ] 개별 세트의 완료 여부 조회 (userId 검증 포함) */
     Boolean getIsCompletedById(@Param("todoId") Long todoId,

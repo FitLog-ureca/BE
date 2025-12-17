@@ -40,6 +40,41 @@
           AND user_id = #{userId};
     </select>
 
+    <select id="findNearestBaseTodoId" resultType="long">
+        <![CDATA[
+        SELECT MAX(t.todo_id)
+        FROM todos t
+        WHERE t.user_id = #{userId}
+        AND t.sets_number = 1
+        AND t.todo_id <= #{todoId}
+        AND t.exercise_id = (
+            SELECT exercise_id FROM todos WHERE todo_id = #{todoId}
+        )
+        AND t.date = (
+            SELECT date FROM todos WHERE todo_id = #{todoId}
+            )
+        ]]>
+    </select>
+
+    <select id="findMaxSetsNumberInWorkoutRange" resultType="int">
+        <![CDATA[
+        SELECT COALESCE(MAX(sets_number), 1)
+        FROM todos
+        WHERE user_id = #{userId}
+            AND exercise_id = (
+                SELECT exercise_id FROM todos WHERE todo_id = #{baseTodoId}
+            )
+            AND date = (
+                SELECT date FROM todos WHERE todo_id = #{baseTodoId}
+            )
+            AND todo_id >= #{baseTodoId}
+            AND (
+                sets_number != 1 OR todo_id = #{baseTodoId}
+            )
+        ]]>
+    </select>
+
+
 
     <!-- 투두 완료 체크 (userId 검증 포함) -->
     <select id="getIsCompletedById" resultType="boolean">

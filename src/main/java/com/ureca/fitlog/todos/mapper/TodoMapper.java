@@ -1,6 +1,7 @@
 package com.ureca.fitlog.todos.mapper;
 
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
+import com.ureca.fitlog.todos.dto.request.TodoInsertDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,7 +11,7 @@ import java.util.Map;
 @Mapper
 public interface TodoMapper {
     /** [CREATE] - todos/ 새로운 투두리스트(운동 세트) 생성 */
-    void insertTodo(TodoCreateRequestDTO dto);
+    void insertTodo(TodoInsertDTO dto);
 
     void updateWorkoutId(
             @Param("workoutId") Long workoutId,

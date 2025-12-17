@@ -3,6 +3,7 @@ package com.ureca.fitlog.todos.service;
 import com.ureca.fitlog.common.exception.BusinessException;
 import com.ureca.fitlog.common.exception.ExceptionStatus;
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
+import com.ureca.fitlog.todos.dto.request.TodoInsertDTO;
 import com.ureca.fitlog.todos.dto.request.UpdateTodoRecordRequestDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCompleteResponseDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCreateResponseDTO;
@@ -40,72 +41,35 @@ public class TodoService {
         return user.getUserId();
     }
 
-    /** Todo 생성 (세트번호 자동 증가) */
-    @Transactional
-    public TodoCreateResponseDTO createTodo(TodoCreateRequestDTO dto) {
-        /** 기존 todos/create API 로직 */
-//        Long userId = getCurrentUserId();
-//        dto.setUserId(userId);
-//
-//        int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId(), userId);
-//        int nextSetNumber = currentCount + 1;
-//        dto.setSetsNumber(nextSetNumber);
-//
-//        todoMapper.insertTodo(dto);
-//
-//        return TodoCreateResponseDTO.builder()
-//                .todoId(dto.getTodoId())
-//                .exerciseId(dto.getExerciseId())
-//                .setsNumber(dto.getSetsNumber())
-//                .repsTarget(dto.getRepsTarget())
-//                .weight(dto.getWeight())
-//                .date(dto.getDate())
-//                .isCompleted(false)
-//                .message("투두가 성공적으로 생성되었습니다.")
-//                .build();
 
-        /** todos/ 서비스 로직 */
-        Long userId = getCurrentUserId();
-        dto.setUserId(userId);
-
-        // 🔥 핵심: 운동 항목 생성 시 항상 Set 1
-        dto.setSetsNumber(1);
-
-        todoMapper.insertTodo(dto);
-
-        return TodoCreateResponseDTO.builder()
-                .todoId(dto.getTodoId())
-                .exerciseId(dto.getExerciseId())
-                .setsNumber(1)
-                .repsTarget(dto.getRepsTarget())
-                .weight(dto.getWeight())
-                .date(dto.getDate())
-                .isCompleted(false)
-                .message("운동 항목이 생성되었습니다.")
-                .build();
-    }
 
     @Transactional
     public TodoCreateResponseDTO createWorkout(TodoCreateRequestDTO req) {
         Long userId = getCurrentUserId();
 
-        // 1️⃣ Set 1 생성 (workout_id 임시 값)
-        TodoCreateRequestDTO dto = TodoCreateRequestDTO.builder()
+        // 1️⃣ insert용 DTO 생성 (Set 1)
+        TodoInsertDTO insertDto = TodoInsertDTO.builder()
                 .userId(userId)
                 .exerciseId(req.getExerciseId())
                 .date(req.getDate())
                 .setsNumber(1)
-                .workoutId(0L) // 임시
+                .workoutId(0L)   // 임시
                 .build();
 
-        todoMapper.insertTodo(dto); // todoId 생성
+        // 2️⃣ insert
+        todoMapper.insertTodo(insertDto);
 
-        // 2️⃣ workout_id = 자기 todoId
-        todoMapper.updateWorkoutId(dto.getTodoId(), dto.getTodoId(), userId);
+        // 3️⃣ workout_id = 자기 todoId
+        todoMapper.updateWorkoutId(
+                insertDto.getTodoId(),
+                insertDto.getTodoId(),
+                userId
+        );
 
+        // 4️⃣ response
         return TodoCreateResponseDTO.builder()
-                .todoId(dto.getTodoId())
-                .workoutId(dto.getTodoId())
+                .todoId(insertDto.getTodoId())
+                .workoutId(insertDto.getTodoId())
                 .setsNumber(1)
                 .date(req.getDate())
                 .message("운동 항목이 생성되었습니다.")
@@ -117,21 +81,12 @@ public class TodoService {
     public TodoCreateResponseDTO addSet(Long todoId) {
         Long userId = getCurrentUserId();
 
-        // 1️⃣ workout_id 조회 (todoId는 Set1)
         Long workoutId =
                 todoMapper.findWorkoutIdByTodoId(todoId, userId);
 
-        if (workoutId == null) {
-            throw new BusinessException(
-                    ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION
-            );
-        }
-
-        // 2️⃣ 다음 세트 번호
         int nextSetNumber =
                 todoMapper.findMaxSetsNumberByWorkoutId(workoutId, userId) + 1;
 
-        // 3️⃣ 기준 정보 조회
         Map<String, Object> info =
                 todoMapper.findDateAndExerciseIdByTodoId(todoId, userId);
 
@@ -140,8 +95,7 @@ public class TodoService {
         Long exerciseId =
                 ((Number) info.get("exercise_id")).longValue();
 
-        // 4️⃣ insert
-        TodoCreateRequestDTO dto = TodoCreateRequestDTO.builder()
+        TodoInsertDTO insertDto = TodoInsertDTO.builder()
                 .userId(userId)
                 .workoutId(workoutId)
                 .exerciseId(exerciseId)
@@ -149,14 +103,13 @@ public class TodoService {
                 .setsNumber(nextSetNumber)
                 .build();
 
-        todoMapper.insertTodo(dto);
+        todoMapper.insertTodo(insertDto);
 
         return TodoCreateResponseDTO.builder()
-                .todoId(dto.getTodoId())
+                .todoId(insertDto.getTodoId())
                 .workoutId(workoutId)
                 .setsNumber(nextSetNumber)
                 .date(date)
-                .isCompleted(false)
                 .message("세트가 추가되었습니다.")
                 .build();
     }

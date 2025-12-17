@@ -15,7 +15,7 @@
 
     <!-- 투두 생성 -->
     <insert id="insertTodo"
-            parameterType="com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO"
+            parameterType="com.ureca.fitlog.todos.dto.request.TodoInsertDTO"
             useGeneratedKeys="true"
             keyProperty="todoId">
         INSERT INTO todos (
@@ -38,6 +38,7 @@
                      #{restTime}
                  )
     </insert>
+
 
 
     <select id="findMaxSetsNumberByTodoId" resultType="int">

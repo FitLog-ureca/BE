@@ -12,17 +12,20 @@ public interface TodoMapper {
     /** [CREATE] - todos/ 새로운 투두리스트(운동 세트) 생성 */
     void insertTodo(TodoCreateRequestDTO dto);
 
-    /** [CREATE] - todos/{todoId}/sets 새로운 세트항목(기존 운동 항목 기반) 생성 */
-    int findMaxSetsNumberByTodoId(@Param("todoId") Long todoId,
-                                  @Param("userId") Long userId);
-
-    Long findNearestBaseTodoId(
+    void updateWorkoutId(
+            @Param("workoutId") Long workoutId,
             @Param("todoId") Long todoId,
             @Param("userId") Long userId
     );
 
-    Integer findMaxSetsNumberInWorkoutRange(
-            @Param("baseTodoId") Long baseTodoId,
+    /** [CREATE] - todos/{todoId}/sets 새로운 세트항목(기존 운동 항목 기반) 생성 */
+    Long findWorkoutIdByTodoId(
+            @Param("todoId") Long todoId,
+            @Param("userId") Long userId
+    );
+
+    int findMaxSetsNumberByWorkoutId(
+            @Param("workoutId") Long workoutId,
             @Param("userId") Long userId
     );
 

@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class TodoCreateResponseDTO {
     private Long todoId;          // 새로 생성된 투두 ID
+    private Long workoutId;
     private LocalDate date;       // 날짜
     private Long exerciseId;      // 운동 ID
     private Integer setsNumber;   // 자동 세트 번호

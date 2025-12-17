@@ -18,6 +18,8 @@ public class TodoCreateRequestDTO {
     @Schema(hidden = true)
     private Long userId;
 
+    private Long workoutId;
+
     @Schema(description = "운동 날짜", example = "2025-01-01")
     private LocalDate date;       // 운동 날짜
 

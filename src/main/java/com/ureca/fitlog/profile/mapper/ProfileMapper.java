@@ -12,6 +12,10 @@ public interface ProfileMapper {
     ProfileResponseDTO findProfileByLoginId(@Param("loginId") String loginId);
 
     /** 회원 프로필 수정 */
-    int updateProfile(@Param("loginId") String loginId,
-                      @Param("request") ProfileRequestDTO request);
+    int updateProfile(
+            @Param("loginId") String loginId,
+            @Param("request") ProfileRequestDTO request,
+            @Param("profileImage") String profileImage,
+            @Param("shouldUpdateImage") boolean shouldUpdateImage // 이미지 업데이트가 있는지 여부
+    );
 }

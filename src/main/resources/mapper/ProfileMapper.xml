@@ -10,7 +10,7 @@
             parameterType="string"
             resultType="com.ureca.fitlog.profile.dto.response.ProfileResponseDTO">
         SELECT
-            username AS name,
+            username,
             bio,
             profile_image AS profileImage,
             birth_date AS birthDate
@@ -19,16 +19,29 @@
     </select>
 
     <!-- 프로필 수정 -->
-    <update id="updateProfile"
-            parameterType="map">
+    <update id="updateProfile">
         UPDATE users
-        SET
-            username = #{request.name},
-            birth_date = #{request.birthDate},
-            bio = #{request.bio},
-            profile_image = #{request.profileImage},
+        <set>
+            <if test="request.username != null">
+                username = #{request.username},
+            </if>
+            <if test="request.birthDate != null">
+                birth_date = #{request.birthDate},
+            </if>
+            <if test="request.bio != null">
+                bio = #{request.bio},
+            </if>
+            <if test="request.bio == null">
+                bio = NULL,
+            </if>
+            <!-- shouldUpdateImage가 true일 때만 이미지 업데이트 (null 포함) -->
+            <if test="shouldUpdateImage">
+                profile_image = #{profileImage},
+            </if>
             updated_at = CURRENT_TIMESTAMP
-        WHERE login_id = #{loginId};
+        </set>
+        WHERE login_id = #{loginId}
     </update>
+
 
 </mapper>

@@ -14,7 +14,7 @@ import java.time.Period;
 @Builder
 public class ProfileResponseDTO {
 
-    private String name;
+    private String username;
     private int age;
     private String bio;
     private String profileImage;

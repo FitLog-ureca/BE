@@ -51,6 +51,19 @@ public class TodoController {
         return ResponseEntity.ok(todoService.createTodo(request));
     }
 
+    /** 세트 추가 버튼으로 투두 생성 - sets_number가 기존의 세트 항목 수를 고려하여 증가 */
+    @PostMapping("/{todoId}/sets")
+    @Operation(
+            summary = "세트 추가",
+            description = "기존 운동 항목에 새로운 세트를 추가합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "세트 추가 성공")
+    public ResponseEntity<TodoCreateResponseDTO> addSet(
+            @PathVariable Long todoId
+    ) {
+        return ResponseEntity.ok(todoService.addSet(todoId));
+    }
+
 
     /** 운동 완료 상태 토글 (true ↔ false 자동 전환) */
     @PatchMapping("/done/{date}")

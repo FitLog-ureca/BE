@@ -32,6 +32,15 @@
                );
     </insert>
 
+    <select id="findMaxSetsNumberByTodoId" resultType="int">
+        SELECT MAX(sets_number)
+        FROM todos
+        WHERE date = (SELECT date FROM todos WHERE todo_id = #{todoId})
+          AND exercise_id = (SELECT exercise_id FROM todos WHERE todo_id = #{todoId})
+          AND user_id = #{userId};
+    </select>
+
+
     <!-- 투두 완료 체크 (userId 검증 포함) -->
     <select id="getIsCompletedById" resultType="boolean">
         SELECT is_completed

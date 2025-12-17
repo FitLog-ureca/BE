@@ -64,7 +64,10 @@ public class TodoService {
 //                .message("투두가 성공적으로 생성되었습니다.")
 //                .build();
 
-        /** todos/ 로직 */
+        /** todos/ 서비스 로직 */
+        Long userId = getCurrentUserId();
+        dto.setUserId(userId);
+
         // 🔥 핵심: 운동 항목 생성 시 항상 Set 1
         dto.setSetsNumber(1);
 
@@ -81,6 +84,46 @@ public class TodoService {
                 .message("운동 항목이 생성되었습니다.")
                 .build();
     }
+
+    /** todos/{todoId}/sets 서비스 로직 */
+    @Transactional
+    public TodoCreateResponseDTO addSet(Long baseTodoId) {
+        Long userId = getCurrentUserId();
+
+        // 1️⃣ 기준 todo 정보 조회
+        Map<String, Object> baseInfo =
+                todoMapper.findDateAndExerciseIdByTodoId(baseTodoId, userId);
+
+        if (baseInfo == null) {
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
+        }
+
+        LocalDate date = ((java.sql.Date) baseInfo.get("date")).toLocalDate();
+        Long exerciseId = ((Number) baseInfo.get("exercise_id")).longValue();
+
+        // 2️⃣ 해당 운동 항목의 최대 세트 번호
+        int maxSetNumber =
+                todoMapper.findMaxSetsNumberByTodoId(baseTodoId, userId);
+
+        TodoCreateRequestDTO dto = TodoCreateRequestDTO.builder()
+                .userId(userId)
+                .date(date)
+                .exerciseId(exerciseId)
+                .setsNumber(maxSetNumber + 1)
+                .build();
+
+        todoMapper.insertTodo(dto);
+
+        return TodoCreateResponseDTO.builder()
+                .todoId(dto.getTodoId())
+                .exerciseId(exerciseId)
+                .setsNumber(dto.getSetsNumber())
+                .date(date)
+                .isCompleted(false)
+                .message("세트가 추가되었습니다.")
+                .build();
+    }
+
 
     /** 개별 세트 완료 토글 (todoId만으로 true/false 자동 반전) */
     public TodoCompleteResponseDTO updateTodoCompletion(Long todoId) {

@@ -39,7 +39,12 @@
                  )
     </insert>
 
-
+    <select id="findBaseInfoByTodoId" resultType="map">
+        SELECT date, exercise_id
+        FROM todos
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId}
+    </select>
 
     <select id="findMaxSetsNumberByTodoId" resultType="int">
         SELECT MAX(sets_number)
@@ -129,35 +134,6 @@
           AND user_id = #{userId};
     </update>
 
-
-    <!-- 세트번호 임시 음수화 (userId 필터링) -->
-    <update id="tempNegateSetsNumbers" parameterType="map">
-        UPDATE todos
-        SET sets_number = -(sets_number)
-        WHERE date = #{date}
-          AND exercise_id = #{exerciseId}
-          AND user_id = #{userId};
-    </update>
-
-    <!-- 세트번호 재정렬 (userId 필터링) -->
-    <update id="reorderSetsNumbers" parameterType="map">
-        UPDATE todos t
-            JOIN (
-            SELECT
-            todo_id,
-            ROW_NUMBER() OVER (ORDER BY todo_id ASC) AS new_number
-            FROM todos
-            WHERE date = #{date}
-            AND exercise_id = #{exerciseId}
-            AND user_id = #{userId}
-            ) ranked
-        ON t.todo_id = ranked.todo_id
-            SET t.sets_number = ranked.new_number
-        WHERE t.date = #{date}
-          AND t.exercise_id = #{exerciseId}
-          AND t.user_id = #{userId};
-    </update>
-
     <!-- 특정 todo_id 삭제 (userId 검증 포함) -->
     <delete id="deleteTodoById" parameterType="map">
         DELETE FROM todos
@@ -172,13 +148,28 @@
           AND user_id = #{userId}
     </delete>
 
-    <!-- 삭제된 todo의 date, exercise_id 조회 (userId 검증 포함) -->
-    <select id="findDateAndExerciseIdByTodoId" parameterType="map" resultType="map">
-        SELECT date, exercise_id
+    <!-- 삭제 대상 조회 (workout_id + sets_number) -->
+    <select id="findWorkoutIdAndSetNumberByTodoId" resultType="map">
+        SELECT workout_id, sets_number
         FROM todos
         WHERE todo_id = #{todoId}
-          AND user_id = #{userId};
+          AND user_id = #{userId}
     </select>
+
+    <!-- workout_id 기준 재정렬 (ROW_NUMBER 방식) -->
+    <update id="reorderSetsByWorkoutId">
+        UPDATE todos t
+            JOIN (
+            SELECT
+            todo_id,
+            ROW_NUMBER() OVER (ORDER BY sets_number ASC, todo_id ASC) AS new_number
+            FROM todos
+            WHERE workout_id = #{workoutId}
+            AND user_id = #{userId}
+            ) r ON t.todo_id = r.todo_id
+            SET t.sets_number = r.new_number
+        WHERE t.user_id = #{userId}
+    </update>
 
     <!-- 하루 완료 버튼(is_done) 업데이트 (userId 필터링) -->
     <update id="updateTodosDoneStatus">

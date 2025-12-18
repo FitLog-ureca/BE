@@ -34,6 +34,8 @@ public interface TodoMapper {
     Boolean getIsCompletedById(@Param("todoId") Long todoId,
                                       @Param("userId") Long userId);
 
+    Map<String, Object> findBaseInfoByTodoId(Long todoId, Long userId);
+
     /** [UPDATE] 세트의 완료 상태 토글 (userId 검증 포함) */
     int updateTodoCompletion(@Param("todoId") Long todoId,
                              @Param("userId") Long userId,
@@ -68,25 +70,15 @@ public interface TodoMapper {
     int deleteTodoById(@Param("todoId") Long todoId,
                        @Param("userId") Long userId);
 
-    /** 삭제된 todo의 date, exercise_id 조회 (userId 검증 포함) */
-    Map<String, Object> findDateAndExerciseIdByTodoId(@Param("todoId") Long todoId,
-                                                      @Param("userId") Long userId);
-
     /** [DELETE] work_id 기준으로 해당 운동 목록 삭제 */
     void deleteByWorkoutId(
             @Param("workoutId") Long workoutId,
             @Param("userId") Long userId
     );
 
-    /** 특정 날짜 + 운동종목(exercise_id)의 sets_number 임시 음수화 (userId 필터링) */
-    void tempNegateSetsNumbers(@Param("date") LocalDate date,
-                               @Param("exerciseId") Long exerciseId,
-                               @Param("userId") Long userId);
+    Map<String, Object> findWorkoutIdAndSetNumberByTodoId(Long todoId, Long userId);
 
-    /** 특정 날짜 + 운동종목(exercise_id)의 sets_number 재정렬 (userId 필터링) */
-    void reorderSetsNumbers(@Param("date") LocalDate date,
-                            @Param("exerciseId") Long exerciseId,
-                            @Param("userId") Long userId);
+    void reorderSetsByWorkoutId(Long workoutId, Long userId);
 
     /** 세트별 휴식시간 기록 */
     int updateRestTime(@Param("todoId") Long todoId,

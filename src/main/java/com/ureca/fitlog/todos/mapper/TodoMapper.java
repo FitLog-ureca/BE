@@ -72,6 +72,12 @@ public interface TodoMapper {
     Map<String, Object> findDateAndExerciseIdByTodoId(@Param("todoId") Long todoId,
                                                       @Param("userId") Long userId);
 
+    /** [DELETE] work_id 기준으로 해당 운동 목록 삭제 */
+    void deleteByWorkoutId(
+            @Param("workoutId") Long workoutId,
+            @Param("userId") Long userId
+    );
+
     /** 특정 날짜 + 운동종목(exercise_id)의 sets_number 임시 음수화 (userId 필터링) */
     void tempNegateSetsNumbers(@Param("date") LocalDate date,
                                @Param("exerciseId") Long exerciseId,

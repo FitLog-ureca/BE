@@ -165,6 +165,13 @@
           AND user_id = #{userId};
     </delete>
 
+    <!-- 특정 workout_id 삭제 -->
+    <delete id="deleteByWorkoutId">
+        DELETE FROM todos
+        WHERE workout_id = #{workoutId}
+          AND user_id = #{userId}
+    </delete>
+
     <!-- 삭제된 todo의 date, exercise_id 조회 (userId 검증 포함) -->
     <select id="findDateAndExerciseIdByTodoId" parameterType="map" resultType="map">
         SELECT date, exercise_id

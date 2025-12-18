@@ -1,5 +1,6 @@
 package com.ureca.fitlog.todos.controller;
 
+import com.ureca.fitlog.common.dto.ApiMessageResponse;
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
 import com.ureca.fitlog.todos.dto.request.UpdateRestTimeRequestDTO;
 import com.ureca.fitlog.todos.dto.request.UpdateTodoRecordRequestDTO;
@@ -138,7 +139,7 @@ public class TodoController {
     }
 
 
-    /** 투두리스트(세트) 삭제 및 sets_number 자동 재정렬 */
+    /** 투두리스트(세트 항목) 삭제 및 sets_number 자동 재정렬 */
     @DeleteMapping("/{todoId}")
     @Operation(
             summary = "운동 목표 삭제"
@@ -157,6 +158,16 @@ public class TodoController {
                 "message", "투두리스트가 삭제되고 sets_number가 재정렬되었습니다."
         ));
     }
+
+    /** 투두리스트(운동 항목) 삭제 */
+    @DeleteMapping("/workouts/{workoutId}")
+    public ResponseEntity<ApiMessageResponse> deleteWorkout(@PathVariable Long workoutId) {
+        todoService.deleteWorkout(workoutId);
+        return ResponseEntity.ok(
+                new ApiMessageResponse("운동 항목이 삭제되었습니다.")
+        );
+    }
+
     /** 세트별 휴식시간 기록 (초 단위) */
     @PatchMapping("/rest/{todoId}")
     @Operation(

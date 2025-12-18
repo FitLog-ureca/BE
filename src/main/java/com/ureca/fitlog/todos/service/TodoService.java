@@ -193,7 +193,7 @@ public class TodoService {
         }
     }
 
-    /** 투두 삭제 */
+    /** 투두 삭제 - 세트 항목 */
     public Map<String, Object> deleteTodoById(Long todoId) {
         Long userId = getCurrentUserId();
         int deleted = todoMapper.deleteTodoById(todoId, userId);
@@ -231,6 +231,13 @@ public class TodoService {
         todoMapper.tempNegateSetsNumbers(date, exerciseId, userId);
         // 세트번호 재정렬 - 해당 사용자의 투두만
         todoMapper.reorderSetsNumbers(date, exerciseId, userId);
+    }
+
+    /** 투두 삭제 - 운동 항목 */
+    @Transactional
+    public void deleteWorkout(Long workoutId) {
+        Long userId = getCurrentUserId();
+        todoMapper.deleteByWorkoutId(workoutId, userId);
     }
 
     /** 휴식 시간 기록 */

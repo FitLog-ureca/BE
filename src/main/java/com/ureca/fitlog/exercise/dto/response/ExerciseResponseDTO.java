@@ -18,6 +18,7 @@ public class ExerciseResponseDTO {
     @Getter @Setter
     public static class ExerciseItem {
         private Long todoId;                          // 투두 ID (참조용)
+        private Long workoutId;
         private Long exerciseId;                      // 운동 ID
         private String exerciseName;                  // 운동 이름
         private Integer setsNumber;                   // 세트 수

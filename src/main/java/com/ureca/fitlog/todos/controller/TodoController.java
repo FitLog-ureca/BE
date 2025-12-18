@@ -1,5 +1,6 @@
 package com.ureca.fitlog.todos.controller;
 
+import com.ureca.fitlog.common.dto.ApiMessageResponse;
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
 import com.ureca.fitlog.todos.dto.request.UpdateRestTimeRequestDTO;
 import com.ureca.fitlog.todos.dto.request.UpdateTodoRecordRequestDTO;
@@ -28,14 +29,41 @@ public class TodoController {
 
     private final TodoService todoService;
 
-    /** 날짜별 투두 생성 */
-    @PostMapping("/create")
+    /**
+     * 운동 항목 추가 버튼으로 투두 생성
+     * - 항상 첫 번째 세트(sets_number = 1)로 생성됨
+     * - workout_id, sets_number는 서버에서 자동 처리
+     */
+    @PostMapping
     @Operation(
-            summary = "운동 목표(todos) 생성"
+            summary = "운동 항목(todo) 생성",
+            description = """
+                운동 항목을 생성합니다.
+                - 항상 첫 번째 세트(sets_number = 1)로 생성됩니다.
+                - workout_id는 서버에서 자동으로 생성됩니다.
+                """
     )
-    public ResponseEntity<TodoCreateResponseDTO> createTodo(@RequestBody TodoCreateRequestDTO createRequestDto) {
-        return ResponseEntity.ok(todoService.createTodo(createRequestDto));
+    @ApiResponse(responseCode = "200", description = "운동 항목 생성 성공")
+    public ResponseEntity<TodoCreateResponseDTO> createWorkout(
+            @RequestBody TodoCreateRequestDTO request
+    ) {
+        return ResponseEntity.ok(todoService.createWorkout(request));
     }
+
+
+    /** 세트 추가 버튼으로 투두 생성 - sets_number가 기존의 세트 항목 수를 고려하여 증가 */
+    @PostMapping("/{todoId}/sets")
+    @Operation(
+            summary = "세트 추가",
+            description = "기존 운동 항목에 새로운 세트를 추가합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "세트 추가 성공")
+    public ResponseEntity<TodoCreateResponseDTO> addSet(
+            @PathVariable Long todoId
+    ) {
+        return ResponseEntity.ok(todoService.addSet(todoId));
+    }
+
 
     /** 운동 완료 상태 토글 (true ↔ false 자동 전환) */
     @PatchMapping("/done/{date}")
@@ -111,7 +139,7 @@ public class TodoController {
     }
 
 
-    /** 투두리스트(세트) 삭제 및 sets_number 자동 재정렬 */
+    /** 투두리스트(세트 항목) 삭제 및 sets_number 자동 재정렬 */
     @DeleteMapping("/{todoId}")
     @Operation(
             summary = "운동 목표 삭제"
@@ -130,6 +158,16 @@ public class TodoController {
                 "message", "투두리스트가 삭제되고 sets_number가 재정렬되었습니다."
         ));
     }
+
+    /** 투두리스트(운동 항목) 삭제 */
+    @DeleteMapping("/workouts/{workoutId}")
+    public ResponseEntity<ApiMessageResponse> deleteWorkout(@PathVariable Long workoutId) {
+        todoService.deleteWorkout(workoutId);
+        return ResponseEntity.ok(
+                new ApiMessageResponse("운동 항목이 삭제되었습니다.")
+        );
+    }
+
     /** 세트별 휴식시간 기록 (초 단위) */
     @PatchMapping("/rest/{todoId}")
     @Operation(

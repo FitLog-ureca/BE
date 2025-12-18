@@ -15,22 +15,82 @@
 
     <!-- 투두 생성 -->
     <insert id="insertTodo"
-            parameterType="com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO"
+            parameterType="com.ureca.fitlog.todos.dto.request.TodoInsertDTO"
             useGeneratedKeys="true"
             keyProperty="todoId">
         INSERT INTO todos (
-            user_id, exercise_id, date, sets_number, reps_target, weight, rest_time
-        )
-        VALUES (
-                   #{userId},
-                   #{exerciseId},
-                   #{date},
-                   #{setsNumber},
-                   #{repsTarget},
-                   #{weight},
-                   #{restTime}
-               );
+            user_id,
+            workout_id,
+            exercise_id,
+            date,
+            sets_number,
+            reps_target,
+            weight,
+            rest_time
+        ) VALUES (
+                     #{userId},
+                     #{workoutId},
+                     #{exerciseId},
+                     #{date},
+                     #{setsNumber},
+                     #{repsTarget},
+                     #{weight},
+                     #{restTime}
+                 )
     </insert>
+
+
+
+    <select id="findMaxSetsNumberByTodoId" resultType="int">
+        SELECT MAX(sets_number)
+        FROM todos
+        WHERE date = (SELECT date FROM todos WHERE todo_id = #{todoId})
+          AND exercise_id = (SELECT exercise_id FROM todos WHERE todo_id = #{todoId})
+          AND user_id = #{userId};
+    </select>
+
+    <select id="findNearestBaseTodoId" resultType="long">
+        <![CDATA[
+        SELECT MAX(t.todo_id)
+        FROM todos t
+        WHERE t.user_id = #{userId}
+        AND t.sets_number = 1
+        AND t.todo_id <= #{todoId}
+        AND t.exercise_id = (
+            SELECT exercise_id FROM todos WHERE todo_id = #{todoId}
+        )
+        AND t.date = (
+            SELECT date FROM todos WHERE todo_id = #{todoId}
+            )
+        ]]>
+    </select>
+
+    <select id="findMaxSetsNumberInWorkoutRange" resultType="int">
+    <![CDATA[
+        SELECT COALESCE(MAX(t.sets_number), 1)
+        FROM todos t
+        WHERE t.user_id = #{userId}
+          AND t.date = (
+            SELECT date FROM todos WHERE todo_id = #{baseTodoId}
+            )
+                                     AND t.exercise_id = (
+        SELECT exercise_id FROM todos WHERE todo_id = #{baseTodoId}
+            )
+                                        AND t.todo_id >= #{baseTodoId}
+                                        AND t.todo_id < (
+        SELECT COALESCE(
+            MIN(t2.todo_id),
+            999999999
+            )
+        FROM todos t2
+        WHERE t2.user_id = t.user_id
+          AND t2.date = t.date
+          AND t2.exercise_id = t.exercise_id
+          AND t2.sets_number = 1
+          AND t2.todo_id > #{baseTodoId}
+            )
+        ]]>
+</select>
 
     <!-- 투두 완료 체크 (userId 검증 포함) -->
     <select id="getIsCompletedById" resultType="boolean">
@@ -105,6 +165,13 @@
           AND user_id = #{userId};
     </delete>
 
+    <!-- 특정 workout_id 삭제 -->
+    <delete id="deleteByWorkoutId">
+        DELETE FROM todos
+        WHERE workout_id = #{workoutId}
+          AND user_id = #{userId}
+    </delete>
+
     <!-- 삭제된 todo의 date, exercise_id 조회 (userId 검증 포함) -->
     <select id="findDateAndExerciseIdByTodoId" parameterType="map" resultType="map">
         SELECT date, exercise_id
@@ -164,5 +231,28 @@
         WHERE date = #{date}
           AND user_id = #{userId}
           AND (is_completed IS NULL OR is_completed = FALSE);
+    </select>
+
+    <!-- workout_id 업데이트 (운동 항목 생성 직후) -->
+    <update id="updateWorkoutId">
+        UPDATE todos
+        SET workout_id = #{workoutId}
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId}
+    </update>
+
+    <!-- 세트 추가용 쿼리들 -->
+    <select id="findWorkoutIdByTodoId" resultType="long">
+        SELECT workout_id
+        FROM todos
+        WHERE todo_id = #{todoId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="findMaxSetsNumberByWorkoutId" resultType="int">
+        SELECT COALESCE(MAX(sets_number), 0)
+        FROM todos
+        WHERE workout_id = #{workoutId}
+          AND user_id = #{userId}
     </select>
 </mapper>

@@ -10,6 +10,7 @@
             resultType="com.ureca.fitlog.exercise.dto.response.ExerciseResponseDTO$ExerciseItem">
         SELECT
             t.todo_id AS todoId,
+            t.workout_id AS workoutId,
             t.exercise_id AS exerciseId,
             e.name AS exerciseName,
             t.sets_number AS setsNumber,
@@ -23,7 +24,7 @@
                  JOIN exercises e ON t.exercise_id = e.exercise_id
         WHERE t.date = #{date,jdbcType=DATE}
           AND t.user_id = #{userId,jdbcType=BIGINT}
-        ORDER BY t.todo_id ASC
+        ORDER BY t.workout_id ASC, t.sets_number ASC
     </select>
 
     <!-- 계획(미완료) 운동 목록 -->
@@ -31,6 +32,7 @@
             resultType="com.ureca.fitlog.exercise.dto.response.ExerciseResponseDTO$ExerciseItem">
         SELECT
             t.todo_id AS todoId,
+            t.workout_id AS workoutId,
             t.exercise_id AS exerciseId,
             e.name AS exerciseName,
             t.sets_number AS setsNumber,
@@ -42,8 +44,9 @@
                  JOIN exercises e ON t.exercise_id = e.exercise_id
         WHERE t.date = #{date,jdbcType=DATE}
           AND t.user_id = #{userId,jdbcType=BIGINT}
-        ORDER BY t.todo_id ASC
+        ORDER BY t.workout_id ASC, t.sets_number ASC
     </select>
+
 
     <!-- 해당 날짜 총 소모 칼로리 -->
     <select id="findTotalCaloriesByDate"

@@ -3,6 +3,7 @@ package com.ureca.fitlog.todos.service;
 import com.ureca.fitlog.common.exception.BusinessException;
 import com.ureca.fitlog.common.exception.ExceptionStatus;
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
+import com.ureca.fitlog.todos.dto.request.TodoInsertDTO;
 import com.ureca.fitlog.todos.dto.request.UpdateTodoRecordRequestDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCompleteResponseDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCreateResponseDTO;
@@ -40,27 +41,76 @@ public class TodoService {
         return user.getUserId();
     }
 
-    /** Todo 생성 (세트번호 자동 증가) */
+
+
     @Transactional
-    public TodoCreateResponseDTO createTodo(TodoCreateRequestDTO dto) {
+    public TodoCreateResponseDTO createWorkout(TodoCreateRequestDTO req) {
         Long userId = getCurrentUserId();
-        dto.setUserId(userId);
 
-        int currentCount = todoMapper.countSetsByDateAndExercise(dto.getDate(), dto.getExerciseId(), userId);
-        int nextSetNumber = currentCount + 1;
-        dto.setSetsNumber(nextSetNumber);
+        // 1️⃣ insert용 DTO 생성 (Set 1)
+        TodoInsertDTO insertDto = TodoInsertDTO.builder()
+                .userId(userId)
+                .exerciseId(req.getExerciseId())
+                .date(req.getDate())
+                .setsNumber(1)
+                .workoutId(0L)   // 임시
+                .build();
 
-        todoMapper.insertTodo(dto);
+        // 2️⃣ insert
+        todoMapper.insertTodo(insertDto);
+
+        // 3️⃣ workout_id = 자기 todoId
+        todoMapper.updateWorkoutId(
+                insertDto.getTodoId(),
+                insertDto.getTodoId(),
+                userId
+        );
+
+        // 4️⃣ response
+        return TodoCreateResponseDTO.builder()
+                .todoId(insertDto.getTodoId())
+                .workoutId(insertDto.getTodoId())
+                .setsNumber(1)
+                .date(req.getDate())
+                .message("운동 항목이 생성되었습니다.")
+                .build();
+    }
+
+    /** todos/{todoId}/sets 서비스 로직 */
+    @Transactional
+    public TodoCreateResponseDTO addSet(Long todoId) {
+        Long userId = getCurrentUserId();
+
+        Long workoutId =
+                todoMapper.findWorkoutIdByTodoId(todoId, userId);
+
+        int nextSetNumber =
+                todoMapper.findMaxSetsNumberByWorkoutId(workoutId, userId) + 1;
+
+        Map<String, Object> info =
+                todoMapper.findDateAndExerciseIdByTodoId(todoId, userId);
+
+        LocalDate date =
+                ((java.sql.Date) info.get("date")).toLocalDate();
+        Long exerciseId =
+                ((Number) info.get("exercise_id")).longValue();
+
+        TodoInsertDTO insertDto = TodoInsertDTO.builder()
+                .userId(userId)
+                .workoutId(workoutId)
+                .exerciseId(exerciseId)
+                .date(date)
+                .setsNumber(nextSetNumber)
+                .build();
+
+        todoMapper.insertTodo(insertDto);
 
         return TodoCreateResponseDTO.builder()
-                .todoId(dto.getTodoId())
-                .exerciseId(dto.getExerciseId())
-                .setsNumber(dto.getSetsNumber())
-                .repsTarget(dto.getRepsTarget())
-                .weight(dto.getWeight())
-                .date(dto.getDate())
-                .isCompleted(false)
-                .message("투두가 성공적으로 생성되었습니다.")
+                .todoId(insertDto.getTodoId())
+                .workoutId(workoutId)
+                .setsNumber(nextSetNumber)
+                .date(date)
+                .message("세트가 추가되었습니다.")
                 .build();
     }
 
@@ -143,7 +193,7 @@ public class TodoService {
         }
     }
 
-    /** 투두 삭제 */
+    /** 투두 삭제 - 세트 항목 */
     public Map<String, Object> deleteTodoById(Long todoId) {
         Long userId = getCurrentUserId();
         int deleted = todoMapper.deleteTodoById(todoId, userId);
@@ -181,6 +231,13 @@ public class TodoService {
         todoMapper.tempNegateSetsNumbers(date, exerciseId, userId);
         // 세트번호 재정렬 - 해당 사용자의 투두만
         todoMapper.reorderSetsNumbers(date, exerciseId, userId);
+    }
+
+    /** 투두 삭제 - 운동 항목 */
+    @Transactional
+    public void deleteWorkout(Long workoutId) {
+        Long userId = getCurrentUserId();
+        todoMapper.deleteByWorkoutId(workoutId, userId);
     }
 
     /** 휴식 시간 기록 */

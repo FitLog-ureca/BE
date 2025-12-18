@@ -1,6 +1,7 @@
 package com.ureca.fitlog.todos.mapper;
 
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
+import com.ureca.fitlog.todos.dto.request.TodoInsertDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -9,8 +10,25 @@ import java.util.Map;
 
 @Mapper
 public interface TodoMapper {
-    /** [CREATE] 새로운 투두리스트(운동 세트) 생성 */
-    void insertTodo(TodoCreateRequestDTO dto);
+    /** [CREATE] - todos/ 새로운 투두리스트(운동 세트) 생성 */
+    void insertTodo(TodoInsertDTO dto);
+
+    void updateWorkoutId(
+            @Param("workoutId") Long workoutId,
+            @Param("todoId") Long todoId,
+            @Param("userId") Long userId
+    );
+
+    /** [CREATE] - todos/{todoId}/sets 새로운 세트항목(기존 운동 항목 기반) 생성 */
+    Long findWorkoutIdByTodoId(
+            @Param("todoId") Long todoId,
+            @Param("userId") Long userId
+    );
+
+    int findMaxSetsNumberByWorkoutId(
+            @Param("workoutId") Long workoutId,
+            @Param("userId") Long userId
+    );
 
     /** [READ] 개별 세트의 완료 여부 조회 (userId 검증 포함) */
     Boolean getIsCompletedById(@Param("todoId") Long todoId,
@@ -53,6 +71,12 @@ public interface TodoMapper {
     /** 삭제된 todo의 date, exercise_id 조회 (userId 검증 포함) */
     Map<String, Object> findDateAndExerciseIdByTodoId(@Param("todoId") Long todoId,
                                                       @Param("userId") Long userId);
+
+    /** [DELETE] work_id 기준으로 해당 운동 목록 삭제 */
+    void deleteByWorkoutId(
+            @Param("workoutId") Long workoutId,
+            @Param("userId") Long userId
+    );
 
     /** 특정 날짜 + 운동종목(exercise_id)의 sets_number 임시 음수화 (userId 필터링) */
     void tempNegateSetsNumbers(@Param("date") LocalDate date,

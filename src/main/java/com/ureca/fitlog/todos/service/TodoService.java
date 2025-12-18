@@ -81,19 +81,26 @@ public class TodoService {
     public TodoCreateResponseDTO addSet(Long todoId) {
         Long userId = getCurrentUserId();
 
+        // 1️⃣ workout_id 조회
         Long workoutId =
                 todoMapper.findWorkoutIdByTodoId(todoId, userId);
 
+        if (workoutId == null) {
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
+        }
+
+        // 2️⃣ 다음 세트 번호
         int nextSetNumber =
                 todoMapper.findMaxSetsNumberByWorkoutId(workoutId, userId) + 1;
 
-        Map<String, Object> info =
-                todoMapper.findDateAndExerciseIdByTodoId(todoId, userId);
+        // 3️⃣ 기준 세트(todoId)에서 date, exercise_id 가져오기 (대체 쿼리 필요)
+        Map<String, Object> baseInfo =
+                todoMapper.findBaseInfoByTodoId(todoId, userId);
 
         LocalDate date =
-                ((java.sql.Date) info.get("date")).toLocalDate();
+                ((java.sql.Date) baseInfo.get("date")).toLocalDate();
         Long exerciseId =
-                ((Number) info.get("exercise_id")).longValue();
+                ((Number) baseInfo.get("exercise_id")).longValue();
 
         TodoInsertDTO insertDto = TodoInsertDTO.builder()
                 .userId(userId)
@@ -212,25 +219,24 @@ public class TodoService {
     public void deleteTodoAndReorder(Long todoId) {
         Long userId = getCurrentUserId();
 
-        // 삭제 대상의 date, exercise_id 조회 (본인 소유 확인)
-        Map<String, Object> info = todoMapper.findDateAndExerciseIdByTodoId(todoId, userId);
+        // 1) 삭제 대상의 workout_id 조회
+        Map<String, Object> info =
+                todoMapper.findWorkoutIdAndSetNumberByTodoId(todoId, userId);
+
         if (info == null || info.isEmpty()) {
             throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
 
-        Object dateObj = info.get("date");
-        LocalDate date = (dateObj instanceof LocalDate)
-                ? (LocalDate) dateObj
-                : ((Date) dateObj).toLocalDate();
+        Long workoutId = ((Number) info.get("workout_id")).longValue();
 
-        Long exerciseId = ((Number) info.get("exercise_id")).longValue();
+        // 2) 세트 삭제
+        int deleted = todoMapper.deleteTodoById(todoId, userId);
+        if (deleted == 0) {
+            throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
+        }
 
-        // 삭제
-        todoMapper.deleteTodoById(todoId, userId);
-        // 임시 음수화 (UNIQUE 제약 피하기) - 해당 사용자의 투두만
-        todoMapper.tempNegateSetsNumbers(date, exerciseId, userId);
-        // 세트번호 재정렬 - 해당 사용자의 투두만
-        todoMapper.reorderSetsNumbers(date, exerciseId, userId);
+        // 3) 같은 workout_id 내부에서만 재정렬
+        todoMapper.reorderSetsByWorkoutId(workoutId, userId);
     }
 
     /** 투두 삭제 - 운동 항목 */

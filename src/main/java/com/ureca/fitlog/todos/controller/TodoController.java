@@ -36,7 +36,7 @@ public class TodoController {
      */
     @PostMapping
     @Operation(
-            summary = "운동 항목(todo) 생성",
+            summary = "운동 항목 생성 (sets_number가 1인 세트 항목 생성)",
             description = """
                 운동 항목을 생성합니다.
                 - 항상 첫 번째 세트(sets_number = 1)로 생성됩니다.
@@ -54,7 +54,7 @@ public class TodoController {
     /** 세트 추가 버튼으로 투두 생성 - sets_number가 기존의 세트 항목 수를 고려하여 증가 */
     @PostMapping("/{todoId}/sets")
     @Operation(
-            summary = "세트 추가",
+            summary = "세트 항목 생성",
             description = "기존 운동 항목에 새로운 세트를 추가합니다."
     )
     @ApiResponse(responseCode = "200", description = "세트 추가 성공")
@@ -142,7 +142,7 @@ public class TodoController {
     /** 투두리스트(세트 항목) 삭제 및 sets_number 자동 재정렬 */
     @DeleteMapping("/{todoId}")
     @Operation(
-            summary = "운동 목표 삭제"
+            summary = "투두리스트(세트 항목) 삭제"
     )
     @ApiResponse(
             responseCode = "200",
@@ -161,6 +161,9 @@ public class TodoController {
 
     /** 투두리스트(운동 항목) 삭제 */
     @DeleteMapping("/workouts/{workoutId}")
+    @Operation(
+            summary = "투두리스트(운동 항목) 삭제"
+    )
     public ResponseEntity<ApiMessageResponse> deleteWorkout(@PathVariable Long workoutId) {
         todoService.deleteWorkout(workoutId);
         return ResponseEntity.ok(

@@ -18,8 +18,7 @@
             t.weight AS weight,
             t.rest_time AS restTime,
             t.is_completed AS isCompleted,
-            e.default_calories_per_set AS caloriesPerRep,
-            (t.reps_target * e.default_calories_per_set) AS burnedCalories
+            e.default_calories_per_set AS caloriesPerRep
         FROM todos t
                  JOIN exercises e ON t.exercise_id = e.exercise_id
         WHERE t.date = #{date,jdbcType=DATE}

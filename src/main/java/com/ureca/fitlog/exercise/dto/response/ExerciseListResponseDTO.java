@@ -20,7 +20,7 @@ public class ExerciseListResponseDTO {
     public static class ExerciseList {
         private Long exerciseId;
         private String name;
-        private Double defaultCaloriesPerSet;
+        private Double defaultCaloriesPerSet; // 기본 MET 계수
         private String unit;                  // 단위 (회 / 분)
     }
 }

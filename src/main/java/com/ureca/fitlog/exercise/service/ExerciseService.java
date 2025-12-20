@@ -85,32 +85,36 @@ public class ExerciseService {
 
         boolean isDone = todoMapper.existsTodosDoneTrueByDate(date, userId) > 0;
 
-        List<ExerciseResponseDTO.ExerciseItem> exercises;
+        List<ExerciseResponseDTO.ExerciseItem> exercises =
+                exerciseMapper.findCompletedExercisesByDate(date, userId);
+
         double totalCalories = 0.0;
 
-        if (isDone) {
-            exercises = exerciseMapper.findCompletedExercisesByDate(date, userId);
+        for (ExerciseResponseDTO.ExerciseItem item : exercises) {
 
-            for (ExerciseResponseDTO.ExerciseItem item : exercises) {
+            // ✅ 핵심: 완료된 세트만 계산
+            if (Boolean.TRUE.equals(item.getIsCompleted())) {
                 double burnedCalories = calculateBurnedCalories(
-                        item.getCaloriesPerRep(),   // MET 값
+                        item.getCaloriesPerRep(),
                         item.getSetsNumber(),
                         item.getRepsTarget(),
                         item.getWeight()
                 );
+
                 burnedCalories = roundToOneDecimal(burnedCalories);
                 item.setBurnedCalories(burnedCalories);
                 totalCalories += burnedCalories;
+            } else {
+                item.setBurnedCalories(0.0);
             }
-            totalCalories = roundToOneDecimal(totalCalories);
-        } else {
-            exercises = exerciseMapper.findPlannedExercisesByDate(date, userId);
         }
+
+        totalCalories = roundToOneDecimal(totalCalories);
 
         return ExerciseResponseDTO.builder()
                 .date(date)
-                .isDone(isDone)
-                .exercises(exercises != null ? exercises : List.of())
+                .isDone(isDone)          // 🔹 UI 판단용
+                .exercises(exercises)
                 .totalCalories(totalCalories)
                 .message(isDone
                         ? "운동 기록이 성공적으로 조회되었습니다."
@@ -118,7 +122,8 @@ public class ExerciseService {
                 .build();
     }
 
-//   운동 목록 검색
+
+    //   운동 목록 검색
     public ExerciseListResponseDTO getExercises(String keyword, int page, int size) {
         if (page < 0) {
             throw new BusinessException(ExceptionStatus.EXERCISE_VALIDATION_INVALID_PAGE);

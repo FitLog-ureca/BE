@@ -26,7 +26,7 @@ public class ExerciseResponseDTO {
         private Double weight;                        // 중량
         private Integer restTime;                     // 휴식(초)
         private Boolean isCompleted;                  // 세트 완료 여부
-        private Double caloriesPerRep;                // 1회(혹은 1단위)당 칼로리
+        private Double caloriesPerRep;                // MET 계수
         private Double burnedCalories;                // 세트 당 소모 칼로리
     }
 }

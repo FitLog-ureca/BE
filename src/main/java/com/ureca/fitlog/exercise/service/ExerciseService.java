@@ -1,6 +1,7 @@
 package com.ureca.fitlog.exercise.service;
 
 import com.ureca.fitlog.auth.mapper.AuthMapper;
+import com.ureca.fitlog.common.SecurityUtil;
 import com.ureca.fitlog.common.exception.BusinessException;
 import com.ureca.fitlog.common.exception.ExceptionStatus;
 import com.ureca.fitlog.exercise.dto.response.ExerciseListResponseDTO;
@@ -22,11 +23,46 @@ public class ExerciseService {
     private final TodoMapper todoMapper;
     private final AuthMapper authMapper;
 
+    //  칼로리 계산 기준 상수
+    private static final double BASE_WEIGHT = 60.0;          // 기준 체중(kg)
+    private static final double BASE_REP_SECONDS = 2.5;      // 기본 1회당 소요 시간(초)
+    private static final double TRANSITION_SECONDS = 20.0;   // 세트 간 텀(초)
+    private double roundToOneDecimal(double value) {
+        return Math.round(value * 10.0) / 10.0;
+    }
+
+    /** 중량에 따른 rep 시간 보정 */
+    private double calculateRepSeconds(Double weight) {
+        if (weight == null) return BASE_REP_SECONDS;
+
+        if (weight >= 80) return 4.0;
+        if (weight >= 50) return 3.5;
+        if (weight >= 30) return 3.0;
+
+        return BASE_REP_SECONDS;
+    }
+
     /**
-     * 현재 로그인한 사용자의 userId를 가져오는 공통 메서드
+     * caloriesPerRep는 실제로 MET 계수 값
      */
+    private double calculateBurnedCalories(
+            double caloriesPerRep,
+            int sets,
+            int reps,
+            Double weight
+    ) {
+        double repSeconds = calculateRepSeconds(weight);
+
+        double totalSeconds =
+                sets * reps * repSeconds
+                        + Math.max(sets - 1, 0) * TRANSITION_SECONDS;
+
+        return caloriesPerRep * BASE_WEIGHT * (totalSeconds / 3600.0);
+    }
+
+    //  인증 관련 공통 로직
     private Long getCurrentUserId() {
-        String loginId = com.ureca.fitlog.common.SecurityUtil.getLoginId();
+        String loginId = SecurityUtil.getLoginId();
         if (!StringUtils.hasText(loginId)) {
             throw new BusinessException(ExceptionStatus.TODO_AUTH_LOGIN_INFO_NOT_FOUND);
         }
@@ -39,31 +75,37 @@ public class ExerciseService {
         return userId;
     }
 
-    /**
-     * 특정 날짜의 운동 계획 or 기록 조회
-     */
+    // 날짜별 운동 조회
     public ExerciseResponseDTO getExercisesByDate(LocalDate date) {
-        // 날짜 유효성 검증
         if (date == null) {
             throw new BusinessException(ExceptionStatus.EXERCISE_VALIDATION_INVALID_DATE);
         }
 
         Long userId = getCurrentUserId();
 
-        // 오늘 운동 완료 여부 확인 (userId 포함)
         boolean isDone = todoMapper.existsTodosDoneTrueByDate(date, userId) > 0;
 
-        // 운동 목록 조회
         List<ExerciseResponseDTO.ExerciseItem> exercises;
         double totalCalories = 0.0;
 
         if (isDone) {
             exercises = exerciseMapper.findCompletedExercisesByDate(date, userId);
-            totalCalories = exerciseMapper.findTotalCaloriesByDate(date, userId);
+
+            for (ExerciseResponseDTO.ExerciseItem item : exercises) {
+                double burnedCalories = calculateBurnedCalories(
+                        item.getCaloriesPerRep(),   // MET 값
+                        item.getSetsNumber(),
+                        item.getRepsTarget(),
+                        item.getWeight()
+                );
+                burnedCalories = roundToOneDecimal(burnedCalories);
+                item.setBurnedCalories(burnedCalories);
+                totalCalories += burnedCalories;
+            }
+            totalCalories = roundToOneDecimal(totalCalories);
         } else {
             exercises = exerciseMapper.findPlannedExercisesByDate(date, userId);
         }
-
 
         return ExerciseResponseDTO.builder()
                 .date(date)
@@ -76,11 +118,8 @@ public class ExerciseService {
                 .build();
     }
 
-    /**
-     * 운동 목록 검색 (페이징)
-     */
+//   운동 목록 검색
     public ExerciseListResponseDTO getExercises(String keyword, int page, int size) {
-        // 페이징 유효성 검증
         if (page < 0) {
             throw new BusinessException(ExceptionStatus.EXERCISE_VALIDATION_INVALID_PAGE);
         }

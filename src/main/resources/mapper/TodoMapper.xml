@@ -246,4 +246,22 @@
         WHERE workout_id = #{workoutId}
           AND user_id = #{userId}
     </select>
+
+    <!-- 달력 요약 -->
+    <select id="findDailySummaryByDateRange"
+            resultType="com.ureca.fitlog.todos.dto.response.TodoDailySummaryDTO">
+        <![CDATA[
+        SELECT
+            date AS date,
+            COUNT(*) AS totalSets,
+            SUM(CASE WHEN is_completed = TRUE THEN 1 ELSE 0 END) AS completedSets,
+            MAX(is_done) AS isDone
+        FROM todos
+        WHERE user_id = #{userId}
+          AND date >= #{startDate}
+          AND date < #{endDate}
+        GROUP BY date
+        ORDER BY date ASC
+        ]]>
+    </select>
 </mapper>

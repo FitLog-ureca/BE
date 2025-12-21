@@ -7,6 +7,8 @@ import com.ureca.fitlog.todos.dto.request.TodoInsertDTO;
 import com.ureca.fitlog.todos.dto.request.UpdateTodoRecordRequestDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCompleteResponseDTO;
 import com.ureca.fitlog.todos.dto.response.TodoCreateResponseDTO;
+import com.ureca.fitlog.todos.dto.response.TodoDailySummaryDTO;
+import com.ureca.fitlog.todos.dto.response.TodoMonthlySummaryResponseDTO;
 import com.ureca.fitlog.todos.mapper.TodoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -47,7 +51,7 @@ public class TodoService {
     public TodoCreateResponseDTO createWorkout(TodoCreateRequestDTO req) {
         Long userId = getCurrentUserId();
 
-        // 1️⃣ insert용 DTO 생성 (Set 1)
+        // 1. insert용 DTO 생성 (Set 1)
         TodoInsertDTO insertDto = TodoInsertDTO.builder()
                 .userId(userId)
                 .exerciseId(req.getExerciseId())
@@ -56,17 +60,17 @@ public class TodoService {
                 .workoutId(0L)   // 임시
                 .build();
 
-        // 2️⃣ insert
+        // 2. insert
         todoMapper.insertTodo(insertDto);
 
-        // 3️⃣ workout_id = 자기 todoId
+        // 3. workout_id = 자기 todoId
         todoMapper.updateWorkoutId(
                 insertDto.getTodoId(),
                 insertDto.getTodoId(),
                 userId
         );
 
-        // 4️⃣ response
+        // 4. response
         return TodoCreateResponseDTO.builder()
                 .todoId(insertDto.getTodoId())
                 .workoutId(insertDto.getTodoId())
@@ -81,7 +85,7 @@ public class TodoService {
     public TodoCreateResponseDTO addSet(Long todoId) {
         Long userId = getCurrentUserId();
 
-        // 1️⃣ workout_id 조회
+        // 1. workout_id 조회
         Long workoutId =
                 todoMapper.findWorkoutIdByTodoId(todoId, userId);
 
@@ -89,11 +93,11 @@ public class TodoService {
             throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
 
-        // 2️⃣ 다음 세트 번호
+        // 2. 다음 세트 번호
         int nextSetNumber =
                 todoMapper.findMaxSetsNumberByWorkoutId(workoutId, userId) + 1;
 
-        // 3️⃣ 기준 세트(todoId)에서 date, exercise_id 가져오기 (대체 쿼리 필요)
+        // 3. 기준 세트(todoId)에서 date, exercise_id 가져오기 (대체 쿼리 필요)
         Map<String, Object> baseInfo =
                 todoMapper.findBaseInfoByTodoId(todoId, userId);
 
@@ -280,5 +284,28 @@ public class TodoService {
         if (updated == 0) {
             throw new BusinessException(ExceptionStatus.TODO_DOMAIN_NOT_FOUND_OR_NO_PERMISSION);
         }
+    }
+
+    /** 달력 요약 */
+    @Transactional(readOnly = true)
+    public TodoMonthlySummaryResponseDTO getMonthlySummary(int year, int month) {
+        Long userId = getCurrentUserId();
+
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("month는 1~12 사이여야 합니다.");
+        }
+
+        YearMonth ym = YearMonth.of(year, month);
+        LocalDate startDate = ym.atDay(1);
+        LocalDate endDate = ym.plusMonths(1).atDay(1); // 다음달 1일
+
+        List<TodoDailySummaryDTO> summaries =
+                todoMapper.findDailySummaryByDateRange(userId, startDate, endDate);
+
+        return TodoMonthlySummaryResponseDTO.builder()
+                .year(year)
+                .month(month)
+                .summaries(summaries)
+                .build();
     }
 }

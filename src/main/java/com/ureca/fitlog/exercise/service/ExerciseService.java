@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +28,9 @@ public class ExerciseService {
     //  칼로리 계산 기준 상수
     private static final double BASE_WEIGHT = 60.0;          // 기준 체중(kg)
     private static final double BASE_REP_SECONDS = 2.5;      // 기본 1회당 소요 시간(초)
-    private static final double TRANSITION_SECONDS = 20.0;   // 세트 간 텀(초)
+    private static final double DEFAULT_REST_SECONDS = 20.0;
+    private static final double TRANSITION_SECONDS = 20.0;// 세트 간 텀(초)
+
     private double roundToOneDecimal(double value) {
         return Math.round(value * 10.0) / 10.0;
     }
@@ -49,13 +53,18 @@ public class ExerciseService {
             double caloriesPerRep,
             int sets,
             int reps,
-            Double weight
+            Double weight,
+            Integer restTime
     ) {
         double repSeconds = calculateRepSeconds(weight);
 
+        double restSeconds =
+                restTime != null ? restTime.doubleValue() : DEFAULT_REST_SECONDS;
+
         double totalSeconds =
                 sets * reps * repSeconds
-                        + Math.max(sets - 1, 0) * TRANSITION_SECONDS;
+                        + Math.max(sets - 1, 0) * restSeconds;
+
 
         return caloriesPerRep * BASE_WEIGHT * (totalSeconds / 3600.0);
     }
@@ -85,32 +94,59 @@ public class ExerciseService {
 
         boolean isDone = todoMapper.existsTodosDoneTrueByDate(date, userId) > 0;
 
-        List<ExerciseResponseDTO.ExerciseItem> exercises;
+        List<ExerciseResponseDTO.ExerciseItem> exercises =
+                exerciseMapper.findCompletedExercisesByDate(date, userId);
+
         double totalCalories = 0.0;
 
-        if (isDone) {
-            exercises = exerciseMapper.findCompletedExercisesByDate(date, userId);
+        Map<Long, Integer> maxSetNumberByWorkout = new HashMap<>();
+        for (ExerciseResponseDTO.ExerciseItem item : exercises) {
+            maxSetNumberByWorkout.merge(
+                    item.getWorkoutId(),
+                    item.getSetsNumber(),
+                    Math::max
+            );
+        }
 
-            for (ExerciseResponseDTO.ExerciseItem item : exercises) {
+        for (ExerciseResponseDTO.ExerciseItem item : exercises) {
+
+            // 핵심: 완료된 세트만 계산
+            if (Boolean.TRUE.equals(item.getIsCompleted())) {
+                int setsNumber = item.getSetsNumber() != null ? item.getSetsNumber() : 0;
+                int repsTarget = item.getRepsTarget() != null ? item.getRepsTarget() : 0;
+
+                boolean isLastSet =
+                        item.getSetsNumber() != null &&
+                                item.getSetsNumber().equals(
+                                        maxSetNumberByWorkout.get(item.getWorkoutId())
+                                );
+
+                Integer restTimeForCalc =
+                        isLastSet ? 0 : item.getRestTime() != null ? item.getRestTime() : 0;
+
                 double burnedCalories = calculateBurnedCalories(
-                        item.getCaloriesPerRep(),   // MET 값
-                        item.getSetsNumber(),
-                        item.getRepsTarget(),
-                        item.getWeight()
+                        item.getCaloriesPerRep(),
+                        setsNumber,
+                        repsTarget,
+                        item.getWeight(),
+                        restTimeForCalc
                 );
+
+
                 burnedCalories = roundToOneDecimal(burnedCalories);
                 item.setBurnedCalories(burnedCalories);
                 totalCalories += burnedCalories;
+            } else {
+                item.setBurnedCalories(0.0);
             }
-            totalCalories = roundToOneDecimal(totalCalories);
-        } else {
-            exercises = exerciseMapper.findPlannedExercisesByDate(date, userId);
         }
+
+        totalCalories = roundToOneDecimal(totalCalories);
 
         return ExerciseResponseDTO.builder()
                 .date(date)
-                .isDone(isDone)
-                .exercises(exercises != null ? exercises : List.of())
+                .isDone(isDone)          // 🔹 UI 판단용
+                .exercises(exercises)
                 .totalCalories(totalCalories)
                 .message(isDone
                         ? "운동 기록이 성공적으로 조회되었습니다."
@@ -118,7 +154,8 @@ public class ExerciseService {
                 .build();
     }
 
-//   운동 목록 검색
+
+    //   운동 목록 검색
     public ExerciseListResponseDTO getExercises(String keyword, int page, int size) {
         if (page < 0) {
             throw new BusinessException(ExceptionStatus.EXERCISE_VALIDATION_INVALID_PAGE);

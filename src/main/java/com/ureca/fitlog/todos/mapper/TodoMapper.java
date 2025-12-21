@@ -2,10 +2,12 @@ package com.ureca.fitlog.todos.mapper;
 
 import com.ureca.fitlog.todos.dto.request.TodoCreateRequestDTO;
 import com.ureca.fitlog.todos.dto.request.TodoInsertDTO;
+import com.ureca.fitlog.todos.dto.response.TodoDailySummaryDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @Mapper
@@ -95,4 +97,11 @@ public interface TodoMapper {
 
     int countTodosByDateAndNotCompleted(@Param("date") LocalDate date,
                                                @Param("userId") Long userId);
+
+    /** 달력 요약 */
+    List<TodoDailySummaryDTO> findDailySummaryByDateRange(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }

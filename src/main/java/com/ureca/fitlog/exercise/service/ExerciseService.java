@@ -92,12 +92,15 @@ public class ExerciseService {
 
         for (ExerciseResponseDTO.ExerciseItem item : exercises) {
 
-            // ✅ 핵심: 완료된 세트만 계산
+            // 핵심: 완료된 세트만 계산
             if (Boolean.TRUE.equals(item.getIsCompleted())) {
+                int setsNumber = item.getSetsNumber() != null ? item.getSetsNumber() : 0;
+                int repsTarget = item.getRepsTarget() != null ? item.getRepsTarget() : 0;
+
                 double burnedCalories = calculateBurnedCalories(
                         item.getCaloriesPerRep(),
-                        item.getSetsNumber(),
-                        item.getRepsTarget(),
+                        setsNumber,
+                        repsTarget,
                         item.getWeight()
                 );
 

@@ -254,7 +254,8 @@
         SELECT
             date AS date,
             COUNT(*) AS totalSets,
-            SUM(CASE WHEN is_completed = TRUE THEN 1 ELSE 0 END) AS completedSets
+            SUM(CASE WHEN is_completed = TRUE THEN 1 ELSE 0 END) AS completedSets,
+            MAX(is_done) AS isDone
         FROM todos
         WHERE user_id = #{userId}
           AND date >= #{startDate}

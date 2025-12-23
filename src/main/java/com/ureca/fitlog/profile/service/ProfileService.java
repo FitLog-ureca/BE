@@ -149,18 +149,14 @@ public class ProfileService {
         String base64Image = null;
         boolean shouldUpdateImage = false;
 
-        if (profileImage != null) {
-            if (!profileImage.isEmpty()) {
-                // 새 이미지 업로드
-                base64Image = convertImageToBase64(profileImage);
-                shouldUpdateImage = true;
-            } else {
-                // 빈 파일이 전달됨 = 이미지 삭제 요청
-                base64Image = null;
-                shouldUpdateImage = true;
-            }
-        } else {
-            log.info("프로필 이미지 변경 없음 (기존 이미지 유지)");
+        if (profileImage != null && !profileImage.isEmpty()) {
+            // 새 이미지 업로드
+            base64Image = convertImageToBase64(profileImage);
+            shouldUpdateImage = true;
+        } else if (profileImage == null) {
+            // 명시적으로 null이 전달되면 이미지 삭제
+            base64Image = null;
+            shouldUpdateImage = true;
         }
 
         int updated = profileMapper.updateProfile(loginId, request, base64Image, shouldUpdateImage);
